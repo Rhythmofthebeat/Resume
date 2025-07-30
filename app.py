@@ -12,7 +12,7 @@ import markdown
 from werkzeug.utils import secure_filename
 from file_processor import extract_text_from_pdf
 
-from openai.types.error import RateLimitError, AuthenticationError, APIConnectionError
+from openai._exceptions import RateLimitError, AuthenticationError, APIConnectionError
 
 from config import Config
 from flask_cors import CORS
