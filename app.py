@@ -11,7 +11,9 @@ import pickle
 import markdown
 from werkzeug.utils import secure_filename
 from file_processor import extract_text_from_pdf
-from openai import OpenAI, RateLimitError, AuthenticationError, APIConnectionError
+
+from openai.types.error import RateLimitError, AuthenticationError, APIConnectionError
+
 from config import Config
 from flask_cors import CORS
 from tenacity import (
