@@ -1,10 +1,4 @@
 absl-py==2.1.0
-aiobotocore @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_71xswk40o_/croot/aiobotocore_1682537536268/work
-aiofiles @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_f56ag8l7kr/croot/aiofiles_1683773599608/work
-aiohttp @ file:///Users/cbousseau/work/recipes/ci_py311/aiohttp_1677926054700/work
-aioitertools @ file:///tmp/build/80754af9/aioitertools_1607109665762/work
-aiosignal @ file:///tmp/build/80754af9/aiosignal_1637843061372/work
-aiosqlite @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_3d75lecab1/croot/aiosqlite_1683773918307/work
 alabaster @ file:///home/ktietz/src/ci/alabaster_1611921544520/work
 anaconda-catalogs @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_e8tmw882qa/croot/anaconda-catalogs_1685727305051/work
 anaconda-client==1.11.3
