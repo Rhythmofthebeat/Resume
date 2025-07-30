@@ -186,6 +186,7 @@ CORS(app)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+openai.api_key = Config.OPENAI_API_KEY
 
 
 # Retry configuration for OpenAI API calls
