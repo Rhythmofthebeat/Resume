@@ -1,6 +1,6 @@
 from website import create_app
 from flask import Flask, render_template, request, jsonify, abort, current_app
-from openai import OpenAI
+import openai
 from PyPDF2 import PdfReader
 from docx import Document
 import io
