@@ -55,4 +55,4 @@ Robotics engineer passionate about innovation and STEM outreach, with proven abi
 - Clear structure, no bullet points
 """
     OPENAI_MODEL = "gpt-4o"
-    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
