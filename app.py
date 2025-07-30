@@ -350,7 +350,6 @@ from config import Config
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = Config.GOOGLE_APPLICATION_CREDENTIALS
 
 
-client = OpenAI(api_key=Config.OPENAI_API_KEY)
 
 
 
