@@ -31,7 +31,7 @@ import uuid
 from dotenv import load_dotenv
 
 app = create_app()
-client = OpenAI(api_key=Config.OPENAI_API_KEY)
+client = OpenAI()
 
 CACHE_DIR = "cache_results"
 
