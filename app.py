@@ -1,6 +1,6 @@
 from website import create_app
 from flask import Flask, render_template, request, jsonify, abort, current_app
-from openai import OpenAI
+import openai
 from PyPDF2 import PdfReader
 from docx import Document
 import io
@@ -11,7 +11,9 @@ import pickle
 import markdown
 from werkzeug.utils import secure_filename
 from file_processor import extract_text_from_pdf
-from openai import OpenAI, RateLimitError, AuthenticationError, APIConnectionError
+
+from openai._exceptions import RateLimitError, AuthenticationError, APIConnectionError
+
 from config import Config
 from flask_cors import CORS
 from tenacity import (
@@ -32,9 +34,7 @@ from dotenv import load_dotenv
 
 app = create_app()
 
-client = OpenAI(
-    api_key=Config.OPENAI_API_KEY
-)
+client = OpenAI(api_key=Config.OPENAI_API_KEY)
 CACHE_DIR = "cache_results"
 
 def generate_hash(job_desc_text: str, resume_bytes: bytes) -> str:
@@ -67,13 +67,12 @@ def extract_pdf_text(file_stream):
 def extract_docx_text(file_stream):
     try:
         file_stream.seek(0)
-        document = Document(file_stream)
+        document = Document(file_stream)  # <- DO NOT wrap in BytesIO again
         text = "\n".join(para.text for para in document.paragraphs if para.text.strip())
-        return text.strip()
+        return text if text.strip() else "No text found in DOCX file."
     except Exception as e:
         logger.error(f"Error reading DOCX: {e}", exc_info=True)
-        return ""
-
+        return f"Error reading DOCX: {str(e)}"
 
 
 def extract_text_from_file(filename: str, resume_bytes: bytes):
@@ -186,8 +185,6 @@ CORS(app)
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-
 
 
 
