@@ -34,7 +34,7 @@ from dotenv import load_dotenv
 
 app = create_app()
 
-openai.api_key = Config.OPENAI_API_KEY
+client = OpenAI(api_key=Config.OPENAI_API_KEY)
 CACHE_DIR = "cache_results"
 
 def generate_hash(job_desc_text: str, resume_bytes: bytes) -> str:
@@ -113,7 +113,7 @@ Explanation:
     -Links of projects (provide the ALL links in the resume and DO NOT repeat the SAME links)
 (your reasoning by mentioning specific parts of the resume that goes along with the job description. Show picture and highlight the places)
 """
-    response = openai.chat.completions.create(
+    response = client.chat.completions.create(
         model="gpt-4o",
         messages=[{"role": "user", "content": prompt}]
     )
@@ -200,7 +200,7 @@ logger = logging.getLogger(__name__)
 def generate_summary(text):
     """Generate text summary with retry logic"""
     try:
-        response = openai.chat.completions.create(
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {
@@ -367,7 +367,7 @@ os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = Config.GOOGLE_APPLICATION_CREDENT
 def generate_summary(text):
     """Generate text summary with retry logic"""
     try:
-        response = openai.chat.completions.create(
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {
@@ -611,7 +611,7 @@ def test_openai():
 
     for model in models_to_test:
         try:
-            test_response = openai.chat.completions.create(
+            test_response = client.chat.completions.create(
                 model=model,
                 messages=[{"role": "user", "content": "Say 'hello'"}],
                 max_tokens=5,
