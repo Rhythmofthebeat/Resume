@@ -1,6 +1,7 @@
+
 from website import create_app
 from flask import Flask, render_template, request, jsonify, abort, current_app
-import openai
+from openai import OpenAI
 from PyPDF2 import PdfReader
 from docx import Document
 import io
@@ -11,9 +12,7 @@ import pickle
 import markdown
 from werkzeug.utils import secure_filename
 from file_processor import extract_text_from_pdf
-
-from openai._exceptions import RateLimitError, AuthenticationError, APIConnectionError
-
+from openai import OpenAI, RateLimitError, AuthenticationError, APIConnectionError
 from config import Config
 from flask_cors import CORS
 from tenacity import (
@@ -33,8 +32,8 @@ import uuid
 from dotenv import load_dotenv
 
 app = create_app()
+client = OpenAI(api_key=Config.OPENAI_API_KEY)
 
-openai.api_key = Config.OPENAI_API_KEY
 CACHE_DIR = "cache_results"
 
 def generate_hash(job_desc_text: str, resume_bytes: bytes) -> str:
@@ -113,7 +112,7 @@ Explanation:
     -Links of projects (provide the ALL links in the resume and DO NOT repeat the SAME links)
 (your reasoning by mentioning specific parts of the resume that goes along with the job description. Show picture and highlight the places)
 """
-    response = openai.chat.completions.create(
+    response = client.chat.completions.create(
         model="gpt-4o",
         messages=[{"role": "user", "content": prompt}]
     )
@@ -186,6 +185,9 @@ CORS(app)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Initialize OpenAI client
+client = OpenAI(api_key=Config.OPENAI_API_KEY)
+
 
 
 # Retry configuration for OpenAI API calls
@@ -200,7 +202,7 @@ logger = logging.getLogger(__name__)
 def generate_summary(text):
     """Generate text summary with retry logic"""
     try:
-        response = openai.chat.completions.create(
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {
@@ -352,6 +354,7 @@ from config import Config
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = Config.GOOGLE_APPLICATION_CREDENTIALS
 
 
+client = OpenAI(api_key=Config.OPENAI_API_KEY)
 
 
 
@@ -367,7 +370,7 @@ os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = Config.GOOGLE_APPLICATION_CREDENT
 def generate_summary(text):
     """Generate text summary with retry logic"""
     try:
-        response = openai.chat.completions.create(
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {
@@ -611,7 +614,7 @@ def test_openai():
 
     for model in models_to_test:
         try:
-            test_response = openai.chat.completions.create(
+            test_response = client.chat.completions.create(
                 model=model,
                 messages=[{"role": "user", "content": "Say 'hello'"}],
                 max_tokens=5,
