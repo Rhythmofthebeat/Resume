@@ -34,7 +34,7 @@ from dotenv import load_dotenv
 
 app = create_app()
 
-client = OpenAI(api_key=Config.OPENAI_API_KEY)
+openai.api_key = Config.OPENAI_API_KEY
 CACHE_DIR = "cache_results"
 
 def generate_hash(job_desc_text: str, resume_bytes: bytes) -> str:
