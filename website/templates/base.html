@@ -30,6 +30,11 @@
   padding: 0;
   margin: 0;
 }
+.logo {
+  height: 40px;  /* adjust size */
+  width: auto;
+}
+
 
       </style>
 
@@ -37,7 +42,8 @@
     </head>
         <body>
             <nav class = "navbar navbar-expand-lg navbar-dark bg-dark">
-          <a class="navbar-brand d-flex align-items-center" href="/">
+              <!-- LOGO -->
+  <a class="navbar-brand d-flex align-items-center" href="/">
     <img 
       src="{{ url_for('static', filename='KR3.png') }}" 
       alt="KR3 Logo" 
