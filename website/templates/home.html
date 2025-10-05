@@ -1,7 +1,148 @@
-{% extends "base.html" %} {% block title %}Home{% endblock %}
-{% block content %}
-<h1>This is the Home page</h1>
- {% endblock %}
+{% extends "base.html" %}
 
- <!-- We can prob make this the official home page 
-  then we can create another page for the tool-->
+{% block title %}Home{% endblock %}
+
+{% block head %}
+<style>
+ @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+ body {
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(to bottom, #cfe0f5, #87a2cb);
+  margin: 0;
+  padding: 0;
+  
+}
+.homepage-wrapper {
+  position: relative;
+  top: 40%;
+  left: 60%;
+  min-height: calc(100vh - 140px); /* leaves room for navbar height */
+  transform: translate(-50%, 0%); /* centers both vertically and horizontally */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 90%;
+  max-width: 960px;
+  padding: 3rem 2rem 2rem;
+  z-index: 1;
+  box-sizing: border-box;
+}
+
+
+
+
+
+ h1 {
+   font-size: 2.5rem;
+   font-weight: 700;
+   margin-bottom: 1rem;
+   color: #1e1e2f;
+ }
+
+ h2 {
+   font-size: 1.8rem;
+   font-weight: 600;
+   margin-bottom: 1rem;
+   color: #1e1e2f;
+ }
+
+ .tagline {
+   font-size: 1rem;
+   font-style: italic;
+   color: #444;
+   margin-bottom: 2.5rem;
+ }
+
+ .cards {
+   display: flex;
+   flex-direction: column;
+   gap: 2rem;
+   align-items: center;
+ }
+
+ .card {
+   background-color: white;
+   border-radius: 16px;
+   padding: 2rem;
+   width: 100%;
+   max-width: 700px;
+   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+   text-align: left;
+   transition: all 0.3s ease;
+ }
+
+ .card:hover {
+   transform: translateY(-6px);
+   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+ }
+
+ .card p,
+ .card li {
+   font-size: 1rem;
+   color: #2e2e3e;
+   line-height: 1.6;
+ }
+
+ .card ul {
+   margin-left: 1.5rem;
+   margin-bottom: 1rem;
+ }
+
+ /* Decorative blobs */
+ .svg-blob {
+   position: absolute;
+   z-index: -1;
+   opacity: 0.15;
+   width: 450px;
+   height: auto;
+ }
+
+ .blob-top-left {
+   top: -120px;
+   left: -120px;
+ }
+
+ .blob-bottom-right {
+   bottom: -120px;
+   right: -120px;
+ }
+
+</style>
+{% endblock %}
+
+{% block content %}
+<img src="{{ url_for('static', filename='images/blob.svg') }}" class="svg-blob blob-top-left" alt="decorative blob" />
+<img src="{{ url_for('static', filename='images/blob.svg') }}" class="svg-blob blob-bottom-right" alt="decorative blob" />
+
+<div class="homepage-wrapper">
+  <h1>Welcome!</h1>
+  <h2>Explore our Resume Evaluation Portals</h2>
+  <p class="tagline">~ A tool from KR3 Information Systems ~</p>
+
+  <div class="cards">
+    <div class="card">
+      <h2>Resume Summarizer</h2>
+      <p>Upload a resume to get a quick and precise summary of key qualifications. <em>The system will extract:</em></p>
+      <ul>
+        <li>Work Experience</li>
+        <li>Previous Leadership</li>
+        <li>Skills & Certifications</li>
+        <li>Education Level</li>
+      </ul>
+      <p>Perfect for a quick overview of any resume.</p>
+    </div>
+
+    <div class="card">
+      <h2>Resume Matching</h2>
+      <p>Upload a job description and a resume to get a score from <strong>1–100</strong>. <em>You’ll receive:</em></p>
+      <ul>
+        <li>A clear rating</li>
+        <li>Qualifications aligned with the job requirements</li>
+        <li>Areas requiring improvement</li>
+        <li>Criteria that is or isn’t met</li>
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}
