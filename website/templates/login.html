@@ -1,9 +1,30 @@
 {% extends "base.html" %} 
 {% block title %}Login{% endblock %}
 
+{% block head %}
+<style>
+    .login-container {
+        min-height: calc(100vh - 120px); /* ensures footer is below */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px 0;
+    }
+
+    .card {
+        min-height: 450px; /* makes the card longer */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        border-radius: 12px;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container">
-    <div class="row justify-content-center">
+<div class="container login-container">
+    <div class="row justify-content-center w-100">
         <div class="col-md-6 col-lg-5">
             <div class="card">
                 <div class="card-header text-center">
@@ -15,16 +36,13 @@
                             <label for="email" class="form-label">Email Address</label>
                             <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" required>
                         </div>
-                        
                         <div class="mb-3">
                             <label for="password" class="form-label">Password</label>
                             <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
                         </div>
-                        
                         <div class="d-grid mb-3">
                             <button type="submit" class="btn btn-primary">Login</button>
                         </div>
-                        
                         <div class="text-center">
                             <p class="mb-0">Don't have an account? <a href="{{ url_for('auth.sign_up') }}">Sign up now</a></p>
                         </div>
