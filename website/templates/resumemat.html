@@ -31,22 +31,20 @@
         height: 100%;
     }
     
-    .circle-bg {
-        fill: none;
-        stroke: #eee;
-        stroke-width: 8;
-    }
-    
-    .circle {
-        fill: none;
-        stroke-width: 8;
-        stroke-linecap: round;
-        transform: rotate(-90deg);
-        transform-origin: center;
-        stroke-dasharray: 100 100;
-        stroke-dashoffset: 100;
-        transition: stroke-dashoffset 1s ease-out, stroke 0.3s ease;
-    }
+    .circle-bg,
+.circle {
+    fill: none;
+    stroke-width: 3;
+    stroke-linecap: round;
+    transform: rotate(-90deg);
+    transform-origin: center;
+    shape-rendering: geometricPrecision; /* <-- smooths it */
+   
+    stroke: #4a90e2; /* Default color */
+    transition: stroke-dashoffset 1s ease-out, stroke 0.3s ease;
+
+}
+
     
     .percentage {
         fill: var(--dark);
@@ -196,13 +194,17 @@
                         <div class="score-circle mx-auto">
                             <svg viewBox="0 0 36 36" class="circular-chart">
                                 <path class="circle-bg"
-                                    d="M18 2.0845
-                                       a 15.9155 15.9155 0 0 1 0 31.831
-                                       a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                                <path class="circle"
-                                    d="M18 2.0845
-                                       a 15.9155 15.9155 0 0 1 0 31.831
-                                       a 15.9155 15.9155 0 0 1 0 -31.831"/>
+      stroke="#eee"
+      d="M18 2.0845
+         a 15.9155 15.9155 0 0 1 0 31.831
+         a 15.9155 15.9155 0 0 1 0 -31.831" />
+
+<path class="circle"
+      stroke="#4a90e2"
+      d="M18 2.0845
+         a 15.9155 15.9155 0 0 1 0 31.831
+         a 15.9155 15.9155 0 0 1 0 -31.831" />
+
                                 <text x="18" y="18" class="percentage">{{ score_value or 0 }}%</text>
                             </svg>
                         </div>
