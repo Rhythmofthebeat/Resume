@@ -31,19 +31,22 @@
         height: 100%;
     }
     
-    .circle-bg,
+    .circle-bg {
+    fill: none;
+    stroke: #eee;
+    stroke-width: 3.8;
+}
+
 .circle {
     fill: none;
-    stroke-width: 3;
+    stroke-width: 3.8;
     stroke-linecap: round;
+    stroke: #4a90e2;
     transform: rotate(-90deg);
-    transform-origin: center;
-    shape-rendering: geometricPrecision; /* <-- smooths it */
-   
-    stroke: #4a90e2; /* Default color */
-    transition: stroke-dashoffset 1s ease-out, stroke 0.3s ease;
-
+    transform-origin: 50% 50%;
+    transition: stroke-dashoffset 1s ease-out, stroke 0.4s ease;
 }
+
 
     
     .percentage {
@@ -266,14 +269,21 @@ document.addEventListener('DOMContentLoaded', function () {
             
             // Color based on score
             if (score < 30) {
-                circle.setAttribute("stroke", "#dc3545"); // Red
-            } else if (score < 61) {
-                circle.setAttribute("stroke", "#ffc107"); // Yellow
-            } else if (score < 81) {
-                circle.setAttribute("stroke", "#4a90e2"); // Blue
+                circle.setAttribute("stroke", "#dc3545");
+                circle.style.stroke = "#dc3545";
+            }   
+            else if (score < 61) {
+                circle.setAttribute("stroke", "#ffc107");
+                circle.style.stroke = "#ffc107";
+                    } 
+            else if (score < 81) {
+                circle.setAttribute("stroke", "#4a90e2");
+                circle.style.stroke = "#4a90e2";
             } else {
-                circle.setAttribute("stroke", "#28a745"); // Green
+                circle.setAttribute("stroke", "#28a745");
+                circle.style.stroke = "#28a745";
             }
+
         }, 100);
     }
     
