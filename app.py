@@ -138,12 +138,12 @@ def index():
         
 
         # Generate cache key from job text + resume bytes
-        hash_key = generate_hash(job_text, resume_bytes)
+        #hash_key = generate_hash(job_text, resume_bytes)
 
         # Try loading cached result
-        cached = get_cached_result(hash_key)
-        if cached:
-            return render_template('resumemat.html', result=cached["result"], score_value=cached["score"],  job_text=job_text)
+        # cached = get_cached_result(hash_key)
+        #if cached:
+            #return render_template('resumemat.html', result=cached["result"], score_value=cached["score"],  job_text=job_text)
 
         # Call GPT if not cached
         resume_text = extract_text_from_file(resume_file.filename, resume_bytes)
@@ -172,7 +172,7 @@ def index():
             else:
                 score_value = 0
         cleaned_result = result.replace('*', '')
-        save_cached_result(hash_key, {"result": cleaned_result, "score": score_value,})
+        #save_cached_result(hash_key, {"result": cleaned_result, "score": score_value,})
 
     return render_template('resumemat.html', result=cleaned_result, score_value = score_value, job_text=job_text)
 
