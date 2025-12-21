@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual env
+.venv/
+venv/
+
+# Environment variables
+.env
+
+# Databases / instance
+*.db
+instance/
+
+# Generated folders
+uploads/
+audio/
+website/audio/
+
+# Cache artifacts
+cache_results/
+*.pkl
+
+# Editor/OS
+.vscode/
+.DS_Store
+
+# One-off scripts
+normalize_emails.py
+
+resumemat.txt
