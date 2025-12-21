@@ -1,23 +1,26 @@
 import os
-from dotenv import load_dotenv
-
-load_dotenv()
 
 
 class Config:
-    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-    GOOGLE_APPLICATION_CREDENTIALS = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
-    UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER", "uploads")
-    AUDIO_FOLDER = os.getenv("AUDIO_FOLDER", "audio")
+    # Secrets
+    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+    GOOGLE_APPLICATION_CREDENTIALS = os.getenv("GOOGLE_APPLICATION_CREDENTIALS", "")
+
+    # Resume summarizer settings
     ALLOWED_EXTENSIONS = {"pdf", "docx", "txt"}
-    MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
-    MAX_TEXT_LENGTH = 15000  # Characters to send to OpenAI
-    OPENAI_TIMEOUT = 15
-    OPENAI_RETRY_ATTEMPTS = 2
-    OPENAI_RETRY_DELAY = 5
+
+    MAX_FILE_SIZE = int(os.getenv("MAX_FILE_SIZE", str(5 * 1024 * 1024)))  # 5MB default
+    MAX_TEXT_LENGTH = int(os.getenv("MAX_TEXT_LENGTH", "15000"))
+
+    # OpenAI settings
+    OPENAI_TIMEOUT = int(os.getenv("OPENAI_TIMEOUT", "15"))
+    OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o")
+
+    OPENAI_RETRY_ATTEMPTS = int(os.getenv("OPENAI_RETRY_ATTEMPTS", "2"))
+    OPENAI_RETRY_DELAY = int(os.getenv("OPENAI_RETRY_DELAY", "5"))
+
     SYSTEM_PROMPT = """
 You are ResumeAnalyzerGPT, an expert system designed to analyze and summarize resumes with precision. 
-
 
 Guidelines:
 1. Formatting:
@@ -44,7 +47,6 @@ Pursuing/Completed Bachelor's degree in [Field] from [Institution], with focus o
 [Summary]:
 Robotics engineer passionate about innovation and STEM outreach, with proven ability to lead and deliver technical projects. Strong commitment to continuous learning and industry impact.
 
-
 2. Analysis Rules:
 - Be factual, concise, and objective
 - Do not exceed 2 sentences per section
@@ -54,5 +56,3 @@ Robotics engineer passionate about innovation and STEM outreach, with proven abi
 - Third person, professional, concise
 - Clear structure, no bullet points
 """
-    OPENAI_MODEL = "gpt-4o"
-

@@ -30,4 +30,12 @@ cache_results/
 # One-off scripts
 normalize_emails.py
 
+# runtime artifacts
 resumemat.txt
+cache_results/
+__pycache__/
+*.pyc
+instance/
+.env
+website/audio/
+

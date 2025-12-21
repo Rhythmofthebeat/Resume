@@ -1,14 +1,12 @@
 from website import create_app
-from flask import Flask, render_template, request, jsonify, abort, current_app
+from flask import render_template, request, jsonify, current_app
 import openai
-from PyPDF2 import PdfReader
+
 from docx import Document
 import io
 import re
 import os
-import hashlib
-import pickle
-import markdown
+
 from werkzeug.utils import secure_filename
 from file_processor import extract_text_from_pdf
 
@@ -30,39 +28,14 @@ import pytesseract
 
 from flask import send_from_directory
 import uuid
-from dotenv import load_dotenv
+
 
 app = create_app()
 
+from dotenv import load_dotenv
+load_dotenv()
+
 openai.api_key = Config.OPENAI_API_KEY
-CACHE_DIR = "cache_results"
-
-def generate_hash(job_desc_text: str, resume_bytes: bytes) -> str:
-    hasher = hashlib.sha256()
-    hasher.update(job_desc_text.encode('utf-8'))
-    hasher.update(resume_bytes)
-    return hasher.hexdigest()
-
-def get_cached_result(hash_key):
-    filepath = os.path.join(CACHE_DIR, f"{hash_key}.pkl")
-    if os.path.exists(filepath):
-        with open(filepath, "rb") as f:
-            return pickle.load(f)
-    return None
-
-def save_cached_result(hash_key, result_data):
-    os.makedirs(CACHE_DIR, exist_ok=True)
-    filepath = os.path.join(CACHE_DIR, f"{hash_key}.pkl")
-    with open(filepath, "wb") as f:
-        pickle.dump(result_data, f)
-
-
-def extract_pdf_text(file_stream):
-    reader = PdfReader(file_stream)
-    text = ""
-    for page in reader.pages:
-        text += page.extract_text() or ""
-    return text
 
 def extract_docx_text(file_stream):
     try:
@@ -79,12 +52,30 @@ def extract_text_from_file(filename: str, resume_bytes: bytes):
     file_stream = io.BytesIO(resume_bytes)
 
     if filename.endswith('.pdf'):
-        return extract_pdf_text(file_stream)
+    # Use the same PDF extractor as /uploads to keep behavior consistent
+        os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+
+        temp_name = f"tmp_{uuid.uuid4()}_{secure_filename(filename)}"
+        temp_path = os.path.join(app.config["UPLOAD_FOLDER"], temp_name)
+
+        try:
+            with open(temp_path, "wb") as f:
+                f.write(resume_bytes)
+
+            return extract_text_from_pdf(temp_path)
+        finally:
+            try:
+                if os.path.exists(temp_path):
+                    os.remove(temp_path)
+            except Exception:
+                logger.warning("Could not delete temp PDF file", exc_info=True)
+
     elif filename.endswith('.docx'):
         return extract_docx_text(file_stream)
     elif filename.endswith('.txt'):
         return file_stream.getvalue().decode('utf-8')
     return ""
+
 def compare_resume_to_job(job_description, resume):
     prompt = f"""
 Given the following job description and resume, rate how well the resume matches the job description. Provide a score out of 100 and a short explanation.
@@ -119,10 +110,13 @@ Explanation:
     )
     return response.choices[0].message.content
 
-@app.route('/', methods=['GET', 'POST'])
-def index():
+@app.route('/resume-jobmatch', methods=['GET', 'POST'])
+def resume_jobmatch_post():
     result = None
     score_value = 0 #so score is always defined
+    cleaned_result = None
+    job_text = ""
+
 
     if request.method == 'POST':
         job_text = request.form.get('job_req')
@@ -136,16 +130,6 @@ def index():
         resume_bytes = resume_file.read()
         resume_file.stream.seek(0)  # Reset stream for further processing
         
-
-        # Generate cache key from job text + resume bytes
-        #hash_key = generate_hash(job_text, resume_bytes)
-
-        # Try loading cached result
-        # cached = get_cached_result(hash_key)
-        #if cached:
-            #return render_template('resumemat.html', result=cached["result"], score_value=cached["score"],  job_text=job_text)
-
-        # Call GPT if not cached
         resume_text = extract_text_from_file(resume_file.filename, resume_bytes)
 
 
@@ -159,8 +143,7 @@ def index():
         job_text=job_text,
     )
 
-
-        # Optionally, save result to a file
+    # Optionally, save result to a file
         with open("resumemat.txt", "w", encoding="utf-8") as f:
             f.write(result)
         numbers = re.findall(r"\b(\d{1,3})\b", result)
@@ -177,6 +160,7 @@ def index():
     return render_template('resumemat.html', result=cleaned_result, score_value = score_value, job_text=job_text)
 
 
+
 # Initialize Flask app
 
 app.config.from_object(Config)
@@ -187,7 +171,6 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-
 # Retry configuration for OpenAI API calls
 @retry(
     stop=stop_after_attempt(3),
@@ -239,174 +222,12 @@ def generate_basic_analysis(text):
         return {"error": "Could not generate basic analysis"}
 
 
-@app.route("/")
-def home():
-    """Serve the frontend"""
-    return render_template("home.html")
 @app.route("/resumesum")
 def resumesum():
     """Serve the frontend"""
     return render_template("resumesum.html")
 
-
-@app.route("/upload", methods=["POST"])
-def upload_resume():
-    """Handle resume uploads with robust DOCX & PDF support"""
-    logger.info("Upload endpoint hit")
-
-    if "file" not in request.files:
-        logger.error("No file part in request")
-        return jsonify({"error": "No file uploaded"}), 400
-
-    file = request.files["file"]
-
-    if file.filename == "":
-        logger.error("Empty filename received")
-        return jsonify({"error": "Empty filename"}), 400
-
-    filename = secure_filename(file.filename)
-    ext = filename.lower()
-    filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-
-    # Save the uploaded file temporarily
-    try:
-        file.save(filepath)
-        logger.info(f"File saved to {filepath}")
-
-        with open(filepath, "rb") as f:
-            file_stream = io.BytesIO(f.read())
-
-        if ext.endswith(".pdf"):
-            logger.info("Extracting text from PDF")
-            text = extract_pdf_text(file_stream)
-        elif ext.endswith(".docx"):
-            logger.info("Extracting text from DOCX")
-            text = extract_docx_text(file_stream)
-        elif ext.endswith(".txt"):
-            logger.info("Extracting text from TXT")
-            text = file_stream.getvalue().decode("utf-8")
-        elif ext.endswith((".png", ".jpg", ".jpeg", ".bmp", ".tiff")):
-            logger.info("Extracting text from image using OCR")
-            image = Image.open(file_stream)
-            text = pytesseract.image_to_string(image)
-        else:
-            logger.warning(f"Unsupported file type: {ext}")
-            return jsonify({"error": "Unsupported file type"}), 400
-
-        if not text.strip():
-            logger.warning("Extracted text is empty or unreadable")
-            return (
-                jsonify(
-                    {
-                        "status": "partial",
-                        "error": "File appears to be empty or image-based with unreadable text",
-                        **generate_basic_analysis(text),
-                    }
-                ),
-                200,
-            )
-
-        logger.info(f"Extracted {len(text)} characters")
-
-        # Generate AI summary
-        try:
-            text_summary = generate_summary(text)
-            return jsonify(
-                {
-                    "status": "success",
-                    "text_summary": text_summary,
-                    "analysis_type": "AI",
-                }
-            )
-        except Exception as e:
-            logger.error(f"OpenAI API failed: {str(e)}")
-            return (
-                jsonify(
-                    {
-                        "status": "partial",
-                        "error": "AI analysis unavailable",
-                        "analysis_type": "basic",
-                        **generate_basic_analysis(text),
-                    }
-                ),
-                200,
-            )
-
-    except Exception as e:
-        logger.error(f"Unexpected error in /upload: {str(e)}", exc_info=True)
-        return jsonify({"error": "Internal server error"}), 500
-
-    finally:
-        if os.path.exists(filepath):
-            try:
-                os.remove(filepath)
-                logger.info("Temporary file removed")
-            except Exception as e:
-                logger.error(f"Failed to delete temp file: {str(e)}")
-
-
-   #Resume Summary
-load_dotenv()
-
-from config import Config
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = Config.GOOGLE_APPLICATION_CREDENTIALS
-
-
-
-
-
-# Retry configuration for OpenAI API calls
-@retry(
-    stop=stop_after_attempt(3),
-    wait=wait_exponential(multiplier=1, min=4, max=10),
-    retry=(
-        retry_if_exception_type(RateLimitError)
-        | retry_if_exception_type(APIConnectionError)
-    ),
-)
-def generate_summary(text):
-    """Generate text summary with retry logic"""
-    try:
-        response = openai.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {
-                    "role": "system",
-                    "content": "You're a professional resume analyst. Create a concise 3-5 sentence summary focusing on skills, experience, and education.",
-                },
-                {
-                    "role": "user",
-                    "content": f"Summarize this resume:\n\n{text[:Config.MAX_TEXT_LENGTH]}",
-                },
-            ],
-            max_tokens=200,
-            timeout=Config.OPENAI_TIMEOUT,
-        )
-        return response.choices[0].message.content
-    except Exception as e:
-        logger.error(f"OpenAI API error: {str(e)}")
-        raise
-
-
-def generate_basic_analysis(text):
-    """Generate basic analysis when AI fails"""
-    try:
-        words = [w for w in text.split() if len(w) > 3]  # Ignore short words
-        word_counts = Counter(words)
-        top_terms = [w[0] for w in word_counts.most_common(5)]
-
-        return {
-            "analysis": "Basic Text Analysis",
-            "word_count": len(words),
-            "top_terms": top_terms,
-            "estimated_experience": "Junior" if len(words) < 300 else "Senior",
-        }
-    except Exception as e:
-        logger.error(f"Basic analysis failed: {str(e)}")
-        return {"error": "Could not generate basic analysis"}
-
-
-
+   
 @app.route("/uploads", methods=["POST"])
 def uploads_resume():
     """Handle resume uploads with enhanced error handling"""
@@ -477,9 +298,7 @@ def uploads_resume():
         )
 
             logger.info(f"Extracted {len(text)} characters")
-
-           
-
+          
         # Generation AI
         try:
             logger.info("Generating AI summary")
@@ -562,10 +381,6 @@ def uploads_resume():
                 logger.error(f"Failed to remove temporary file: {str(e)}")
 
    
-
-
-
-
 @app.route("/health")
 def health_check():
     """Health check endpoint"""
@@ -581,7 +396,6 @@ def health_check():
             },
         }
     )
-
 
 @app.route("/test/pdf")
 def test_pdf():
@@ -601,7 +415,6 @@ def test_pdf():
         )
     except Exception as e:
         return jsonify({"status": "error", "error": str(e)}), 500
-
 
 @app.route("/test/openai")
 def test_openai():
@@ -643,11 +456,7 @@ def speak_summary():
         filename = f"{uuid.uuid4()}.mp3"
         filepath = os.path.join(audio_folder, filename)
 
-  
-        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.join("secrets", "dazzling-alpha-465307-a7-2417261faf21.json")
-
-
-
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = Config.GOOGLE_APPLICATION_CREDENTIALS
 
         # Google TTS client
         tts_client = texttospeech.TextToSpeechClient()
@@ -679,7 +488,6 @@ def speak_summary():
 
         logger.info(f"Audio successfully saved to {filepath}")
         return jsonify({"audio_url": f"/audio/{filename}"})
-
         
     except Exception as e:
         logger.error(f"Google TTS error: {str(e)}", exc_info=True)
@@ -690,15 +498,9 @@ def serve_audio(filename):
         audio_folder = os.path.join(current_app.root_path,  "website", "audio")
         return send_from_directory(audio_folder, filename)
 
-
-
-
-
     #debug=os.getenv("FLASK_DEBUG", "False").lower() == "true"
-
-
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=true)
+    app.run(host="0.0.0.0", port=port, debug=True)
     

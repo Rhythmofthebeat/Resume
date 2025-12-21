@@ -8,14 +8,18 @@ auth = Blueprint('auth', __name__)
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('views.home'))
+    
     if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
+        email = (request.form.get('email') or '').strip().lower()
+        password = (request.form.get('password') or '').strip()
+
 
         user = User.query.filter_by(email=email).first()
         if user:
             if check_password_hash(user.password, password):
-                flash('Logged in succesfully', category = 'success')
+                flash('Logged in successfully.', category= 'success')
                 login_user(user, remember = True)
                 return redirect(url_for('views.home'))
             else:
@@ -38,12 +42,11 @@ def sign_up():
 
     if request.method == 'POST':
       
-        email = request.form.get('email')
-        first_name = request.form.get('firstName')
-        password1 = request.form.get('password1')
-        password2 = request.form.get('password2')
+        email = (request.form.get('email') or '').strip().lower()
+        first_name = (request.form.get('firstName') or '').strip()
+        password1 = (request.form.get('password1') or '').strip()
+        password2 = (request.form.get('password2') or '').strip()
 
-    
         user = User.query.filter_by(email=email).first()
         if user:
             flash('Email already exists.', category='error')
@@ -78,11 +81,3 @@ def sign_up():
     return render_template("sign_up.html", user=current_user)
 
 
-@auth.route('/resume-summarizer')
-def resume():
-    return render_template('resumesum.html')
-
-
-@auth.route('/resume-jobmatch')
-def resumejob():
-    return render_template('resumemat.html')
