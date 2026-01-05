@@ -201,7 +201,22 @@
     
     <!-- Custom JS -->
     <script src="{{ url_for('static', filename='index.js') }}"></script>
-    
+
+    <script>
+        // Wait 3 seconds, then fade out and remove alerts
+        setTimeout(() => {
+          document.querySelectorAll('.alert').forEach(alert => {
+            // fade out
+            alert.classList.remove('show');
+            alert.classList.add('hide');
+      
+            // remove from DOM after transition (Bootstrap fade is 150ms by default)
+            setTimeout(() => alert.remove(), 200);
+          });
+        },3000);
+      </script>
+      
+
     {% block scripts %}{% endblock %}
 </body>
 </html>
