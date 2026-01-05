@@ -98,10 +98,10 @@ Resume:
 
 Respond with:
 Score: (number and write word based on number)
-            0-30: Horrible
-            31-60: Mediocore
-            61-80: Ok 
-            81-100: Good
+            0-30: Poor
+            31-60: Fair
+            61-80: Good 
+            81-100: Excellent
 score can be from 0-100
 Explanation: 
 (remove all asteriks)
