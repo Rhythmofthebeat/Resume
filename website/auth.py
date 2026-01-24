@@ -71,7 +71,9 @@ def store_reset_token():
     return {"status": "ok"}
 
 
-from supabase import create_client
+from supabase import create_client  
+            
+
 
 @auth.route("/reset-password/form", methods=["GET", "POST"])
 def reset_password_form():
@@ -87,8 +89,14 @@ def reset_password_form():
         if len(new_password) < 7:
             flash("Password must be at least 7 characters.", "error")
             return redirect(request.url)
+        
+        
 
         try:
+            admin_supabase = create_client(
+                "https://rfkgkjlfylhtzxevpphs.supabase.co",
+                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJma2dramxmeWxodHp4ZXZwcGhzIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2MzkzOTc2MSwiZXhwIjoyMDc5NTE1NzYxfQ.vimC-dSL2XQGBpv7qfYquADY9sU2d4nuZOh6m-sAYRQ"
+            )
           
             authed_supabase = create_client(
                 "https://rfkgkjlfylhtzxevpphs.supabase.co",
@@ -99,10 +107,25 @@ def reset_password_form():
                 refresh_token
             )
             
+            
+              # Get Supabase user
+            user_response = authed_supabase.auth.get_user(access_token)
+            supa_user = user_response.user
+            email = supa_user.email
 
-            authed_supabase.auth.update_user({
-                "password": new_password
-            })
+            # Get local user
+            user = User.query.filter_by(email=email).first()
+
+            if user:
+                # Block reusing old password
+                if check_password_hash(user.password, new_password):
+                    flash("You cannot use your old password.", "error")
+                    return redirect(request.url)
+
+            admin_supabase.auth.admin.update_user_by_id(
+                supa_user.id,
+                {"password": new_password}
+            )
 
         except Exception as e:
             print("Password update error:", e)
@@ -126,16 +149,39 @@ def login():
         email = request.form.get('email')
         password = request.form.get('password')
 
-        user = User.query.filter_by(email=email).first()
-        if user and check_password_hash(user.password, password):
-            login_user(user, remember=True)
-            flash('Logged in successfully', 'success')
-            return redirect(url_for('views.home'))
+        try:
+           
+            res = supabase.auth.sign_in_with_password({
+                "email": email,
+                "password": password
+            })
+        except Exception as e:
+            print("Supabase login error:", e)
+            flash("Invalid email or password.", "error")
+            return render_template("login.html")
 
-        flash('Invalid email or password.', 'error')
+        if not res or not res.user:
+            flash("Invalid email or password.", "error")
+            return render_template("login.html")
+
+      
+        local_user = User.query.filter_by(email=email).first()
+
+        if not local_user:
+            local_user = User(
+                email=email,
+                first_name=res.user.user_metadata.get("full_name", ""),
+                password=None  
+            )
+            db.session.add(local_user)
+            db.session.commit()
+
+
+        login_user(local_user, remember=True)
+        flash("Logged in successfully!", "success")
+        return redirect(url_for('views.home'))
 
     return render_template("login.html")
-
 
 @auth.route('/logout')
 @login_required
@@ -182,31 +228,16 @@ def sign_up():
 
 @auth.route('/login/google')
 def login_google():
-    redirect_url = request.host_url.rstrip("/") + "/auth/callback"
+    res = supabase.auth.sign_in_with_oauth({
+        "provider": "google",
+        "options": {
+            "redirect_to": "http://localhost:5000/login/google/finish"
+        }
+    })
+    return redirect(res.url)
 
-    response = supabase.auth.sign_in_with_oauth(
-        provider="google",
-        options={"redirect_to": redirect_url}
-    )
-
-    return redirect(response.url)
 
 
-@auth.route("/auth/callback")
-def auth_callback():
-    return """
-<script>
-const params = new URLSearchParams(window.location.hash.substring(1));
-fetch("/auth/store-session", {
-  method: "POST",
-  headers: {"Content-Type": "application/json"},
-  body: JSON.stringify({
-    access_token: params.get("access_token"),
-    refresh_token: params.get("refresh_token")
-  })
-}).then(() => window.location = "/login/google/finish");
-</script>
-"""
 
 
 @auth.route("/auth/store-session", methods=["POST"])
@@ -219,37 +250,37 @@ def store_session():
 
 @auth.route("/login/google/finish")
 def login_google_finish():
-    access_token = session.get("access_token")
+    code = request.args.get("code")
 
-    if not access_token:
+    if not code:
+        flash("Google login failed (no code).", "error")
+        return redirect(url_for("auth.login"))
+
+    try:
+        session_response = supabase.auth.exchange_code_for_session(code)
+    except Exception as e:
+        print("OAuth exchange error:", e)
         flash("Google login failed.", "error")
         return redirect(url_for("auth.login"))
 
-    supabase.auth.set_session(access_token, session.get("refresh_token"))
-    result = supabase.auth.get_user()
-
-    email = result.user.email
-    name = result.user.user_metadata.get("full_name", "Google User")
-
-    user = User.query.filter_by(email=email).first()
+    user = session_response.user
     if not user:
-        user = User(
+        flash("Google login failed.", "error")
+        return redirect(url_for("auth.login"))
+
+    email = user.email
+    name = user.user_metadata.get("full_name", "Google User")
+
+    local_user = User.query.filter_by(email=email).first()
+    if not local_user:
+        local_user = User(
             email=email,
             first_name=name,
             password=generate_password_hash("google-login")
         )
-        db.session.add(user)
+        db.session.add(local_user)
         db.session.commit()
 
-    login_user(user, remember=True)
+    login_user(local_user, remember=True)
     flash("Logged in with Google!", "success")
-    return redirect(url_for('views.home'))
-
-@auth.route('/resume-summarizer')
-def resume():
-    return render_template('resumesum.html')
-
-
-@auth.route('/resume-jobmatch')
-def resumejob():
-    return render_template('resumemat.html')
+    return redirect(url_for("views.home"))
