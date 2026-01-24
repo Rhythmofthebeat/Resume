@@ -243,10 +243,14 @@ def generate_basic_analysis(text):
 def home():
     """Serve the frontend"""
     return render_template("home.html")
-@app.route("/resumesum")
+@app.route("/resume-summarizer")
 def resumesum():
     """Serve the frontend"""
     return render_template("resumesum.html")
+@app.route("/resume-jobmatch")
+def resumemat():
+    """Serve the frontend"""
+    return render_template("resumemat.html")
 
 
 @app.route("/upload", methods=["POST"])
