@@ -700,6 +700,46 @@ def serve_audio(filename):
 
     #debug=os.getenv("FLASK_DEBUG", "False").lower() == "true"
 
+#Export PDF Summary
+@app.route("/export/summary-pdf", methods=["POST"])
+def export_summary_pdf():
+    data = request.get_json()
+    if not data:
+        return "No data received", 400
+
+    summary = data.get("summary", "").strip()
+    if not summary:
+        return "No summary provided", 400
+
+   
+    voice_names = ["Alex", "Rose", "Linda", "Tom"]
+    lines = summary.split("\n")
+    lines = [line for line in lines if line.strip() not in voice_names]
+    summary = "\n".join(lines).strip()
+
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=LETTER)
+    styles = getSampleStyleSheet()
+
+    story = []
+    story.append(Paragraph("<b>Resume Summary</b>", styles["Title"]))
+    story.append(Spacer(1, 12))
+
+    for paragraph in summary.split("\n\n"):
+        clean_paragraph = paragraph.strip().replace("\n", "<br/>")
+        if clean_paragraph:
+            story.append(Paragraph(clean_paragraph, styles["Normal"]))
+            story.append(Spacer(1, 6))
+
+    doc.build(story)
+    buffer.seek(0)
+
+    return Response(
+        buffer,
+        mimetype="application/pdf",
+        headers={"Content-Disposition": "attachment; filename=resume_summary.pdf"},
+    )
+
 
 
 if __name__ == '__main__':
