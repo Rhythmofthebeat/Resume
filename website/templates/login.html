@@ -2,16 +2,6 @@
 {% block title %}Login{% endblock %}
 
 {% block head %}
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-GLFDS8ZT1H"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-GLFDS8ZT1H');
-</script>
-
 <style>
     .login-container {
         min-height: calc(100vh - 120px); /* ensures footer is below */
@@ -28,8 +18,8 @@
         justify-content: center;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         border-radius: 12px;
-    }
-  .google-btn {
+        
+.google-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -57,10 +47,20 @@
 
     }
 </style>
-
 {% endblock %}
 
 {% block content %}
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GLFDS8ZT1H"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-GLFDS8ZT1H');
+</script>
+
 <div class="container login-container">
     <div class="row justify-content-center w-100">
         <div class="col-md-6 col-lg-5">
@@ -80,6 +80,13 @@
                         </div>
                         <div class="d-grid mb-3">
                             <button type="submit" class="btn btn-primary">Login</button>
+                            <a href="{{ url_for('auth.login_google') }}" class="google-btn">
+                                <img src="https://developers.google.com/identity/images/g-logo.png"
+                                     alt="Google logo"
+                                     style="width:18px;height:18px;margin-right:10px;">
+                                Continue with Google
+                              </a>
+                              
                         </div>
                         <div class="text-center">
                             <p class="mb-0">Don't have an account? <a href="{{ url_for('auth.sign_up') }}">Sign up now</a></p>
