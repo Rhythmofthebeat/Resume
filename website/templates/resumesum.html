@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Resume/Document Summary{% endblock %}
+{% block title %}Resume Summary{% endblock %}
 
 {% block head %}
 
@@ -71,7 +71,6 @@
         align-items: center;
         justify-content: center;
         height: 100%;
-        min-height: 300px;
     }
 
     .right-panel {
@@ -115,12 +114,6 @@
         margin-bottom: 8px;
         align-self: flex-start;
     }
-    .upload-section form {
-    width: 100%;
-    max-width: 520px;
-}
-
-    
 
     .upload-section input[type="file"] {
         width: 100%;
@@ -345,6 +338,11 @@
                 <h2>Current Resume Summary</h2>
                 <div id="summaryText">
                     Upload a resume to generate an AI-powered summary.
+                </div>
+                <div class="text-end mt-3">
+                    <button id="downloadSummaryPdf" class="btn btn-outline-primary">
+                        <i class="fas fa-file-pdf"></i> Download Summary PDF
+                    </button>
                 </div>
             </div>
             <div class="upload-section">
@@ -595,9 +593,25 @@ async function uploadWithRetry(formData, retries = 3) {
     for (let i = 0; i < retries; i++) {
         try {
             const response = await fetch("/uploads", {
-                method: "POST",
-                body: formData,
-            });
+    method: "POST",
+    body: formData
+});
+
+if (response.status === 403) {
+    const data = await response.json();
+
+    if (data.error === "trial_expired") {
+    showPricingModal();
+
+    setTimeout(() => {
+        window.location.href = "/pricing";
+    }, 2000); // 2 second delay
+
+    throw new Error("trial_expired");
+}
+
+}
+
 
             if (response.status === 429) {
                 const retryAfter = parseInt(response.headers.get("Retry-After")) || Math.pow(2, i);
@@ -678,6 +692,8 @@ function handleUploadError(error) {
         message = "API quota exceeded. Check your OpenAI billing.";
     if (message.includes("authentication"))
         message = "API configuration error.";
+    if (error.message === "trial_expired") return;
+
 
     document.getElementById("summaryText").innerHTML = `
         <div class="error-message">
@@ -694,5 +710,37 @@ function handleUploadError(error) {
         document.getElementById("uploadForm").dispatchEvent(new Event("submit"));
     });
 }
+document.getElementById("downloadSummaryPdf")?.addEventListener("click", async () => {
+    const summaryElement = document.getElementById("summaryText");
+    const text = summaryElement.innerText.trim();
+
+    if (!text || text.includes("Upload a resume")) {
+        alert("No summary available to export.");
+        return;
+    }
+
+    const response = await fetch("/export/summary-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ summary: text })
+    });
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "resume_summary.pdf";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+});
+function showPricingModal() {
+    document.getElementById("pricingModal").style.display = "flex";
+}
+
+
 </script>
+
+
 {% endblock %}
