@@ -702,9 +702,11 @@ def serve_audio(filename):
 
 #Export PDF Summary
 # PDF generation (ReportLab)
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.pagesizes import LETTER
 from reportlab.lib.styles import getSampleStyleSheet
+from flask import Response
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+import io
 
 @app.route("/export/summary-pdf", methods=["POST"])
 def export_summary_pdf():
