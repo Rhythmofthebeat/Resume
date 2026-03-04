@@ -11,6 +11,10 @@ import pickle
 import markdown
 from werkzeug.utils import secure_filename
 from file_processor import extract_text_from_pdf
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.lib.pagesizes import LETTER
+from reportlab.lib.styles import getSampleStyleSheet
+from flask import Response, request
 
 from openai._exceptions import RateLimitError, AuthenticationError, APIConnectionError
 
@@ -702,11 +706,6 @@ def serve_audio(filename):
 
 #Export PDF Summary
 # PDF generation (ReportLab)
-from reportlab.lib.pagesizes import LETTER
-from reportlab.lib.styles import getSampleStyleSheet
-from flask import Response
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-import io
 
 @app.route("/export/summary-pdf", methods=["POST"])
 def export_summary_pdf():
