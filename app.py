@@ -701,23 +701,11 @@ def serve_audio(filename):
     #debug=os.getenv("FLASK_DEBUG", "False").lower() == "true"
 
 #Export PDF Summary
-from reportlab.lib.pagesizes import LETTER
-from reportlab.platypus import SimpleDocTemplate, Paragraph
-from reportlab.lib.styles import getSampleStyleSheet
-from flask import Response
-import textwrap
-from reportlab.lib.pagesizes import LETTER
-from reportlab.platypus import SimpleDocTemplate, Paragraph
-from reportlab.lib.styles import getSampleStyleSheet
-from flask import Response
-import io
-
-
+# PDF generation (ReportLab)
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.pagesizes import LETTER
-from flask import Response
-import io
+from reportlab.lib.styles import getSampleStyleSheet
+
 @app.route("/export/summary-pdf", methods=["POST"])
 def export_summary_pdf():
     data = request.get_json()
