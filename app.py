@@ -209,14 +209,14 @@ def generate_summary(text):
             messages=[
                 {
                     "role": "system",
-                    "content": "You're a professional resume analyst. Create a 9-11 sentence summary focusing on skills, experience, education, and other notable mentions. This should be specifics and highlight KEY details",
+                    "content": "You're a professional resume analyst. Create a 9-11 sentence summary focusing on skills, experience, education, and other notable mentions. This should be specifics and highlight KEY details. Do not make the summary too big",
                 },
                 {
                     "role": "user",
                     "content": f"Summarize this resume:\n\n{text[:Config.MAX_TEXT_LENGTH]}",
                 },
             ],
-            max_tokens=900,
+            max_tokens=600,
             timeout=Config.OPENAI_TIMEOUT,
         )
         return response.choices[0].message.content
