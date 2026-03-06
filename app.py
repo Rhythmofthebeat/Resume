@@ -216,7 +216,7 @@ def generate_summary(text):
                     "content": f"Summarize this resume:\n\n{text[:Config.MAX_TEXT_LENGTH]}",
                 },
             ],
-            max_tokens=300,
+            max_tokens=900,
             timeout=Config.OPENAI_TIMEOUT,
         )
         return response.choices[0].message.content
