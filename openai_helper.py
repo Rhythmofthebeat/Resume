@@ -56,7 +56,7 @@ class OpenAIHelper:
                         "content": f"Analyze this resume:\n\n{text[:self.max_text_length]}",
                     },
                 ],
-                max_tokens=300,
+                max_tokens=900,
                 temperature=0.35,
                 timeout=Config.OPENAI_TIMEOUT,
             )
@@ -179,3 +179,4 @@ class OpenAIHelper:
 # Singleton instance for easy import
 
 openai_helper = OpenAIHelper()
+
