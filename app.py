@@ -209,7 +209,7 @@ def generate_summary(text):
             messages=[
                 {
                     "role": "system",
-                    "content": "You're a professional resume analyst. Create a concise 8-9 sentence summary focusing on skills, experience, education, and other notable mentions.",
+                    "content": "You're a professional resume analyst. Create a 8-9 sentence summary focusing on skills, experience, education, and other notable mentions. This should be specifics and highlight KEY details",
                 },
                 {
                     "role": "user",
