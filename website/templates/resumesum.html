@@ -422,19 +422,24 @@ function addHistoryEntry(filename, summary, saveToStorage = true) {
     const currentHistory = JSON.parse(localStorage.getItem("resumeHistory")) || [];
     const existing = currentHistory.find(entry => entry.filename === filename);
     const customName = existing?.customName || cleanName;
+  
+const filenameElem = newEntry.querySelector(".filename");
+filenameElem.textContent = customName;
+filenameElem.contentEditable = true;
+filenameElem.title = filename;
+filenameElem.style.cursor = "text";
 
-    const filenameElem = newEntry.querySelector(".filename");
-    filenameElem.textContent = customName;
-    filenameElem.contentEditable = true;
-    filenameElem.title = filename;
-    filenameElem.style.cursor = "text";
+/* Save name while typing */
+filenameElem.addEventListener("input", () => {
+    const newName = filenameElem.textContent.trim();
 
-    filenameElem.addEventListener("blur", () => {
-        const newName = filenameElem.textContent.trim();
-        if (newName !== cleanName) {
-            updateNameInStorage(filename, newName);
-        }
-    });
+    if (newName.length === 0) {
+        filenameElem.textContent = cleanName;
+        return;
+    }
+
+    updateNameInStorage(filename, newName);
+});
 
     newEntry.querySelector(".summary").textContent = preview;
     newEntry.dataset.fullSummary = summary;
@@ -449,14 +454,16 @@ function addHistoryEntry(filename, summary, saveToStorage = true) {
         });
     }
 
-    newEntry.addEventListener("click", () => {
-        showFullSummary(customName, summary);
-    });
+   newEntry.addEventListener("click", () => {
+    const currentName = filenameElem.textContent.trim();
+    showFullSummary(currentName, summary);
+});
 
-    newEntry.querySelector(".view-details").addEventListener("click", (e) => {
-        e.stopPropagation();
-        showFullSummary(customName, summary);
-    });
+newEntry.querySelector(".view-details").addEventListener("click", (e) => {
+    e.stopPropagation();
+    const currentName = filenameElem.textContent.trim();
+    showFullSummary(currentName, summary);
+});
 
     if (emptyState.nextSibling) {
         historyContainer.insertBefore(newEntry, emptyState.nextSibling);
