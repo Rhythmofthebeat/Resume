@@ -115,7 +115,7 @@ Explanation:
     -Skillset/Technical Skills
     -Experience/Internships
     -Links of projects (provide the ALL links in the resume and DO NOT repeat the SAME links)
-(your reasoning by mentioning specific parts of the resume that goes along with the job description. Show picture and highlight the places)
+(your reasoning by mentioning ALL specific parts of the resume that goes along with the job description. Show picture and highlight the places)
 """
     response = openai.chat.completions.create(
         model="gpt-4o",
