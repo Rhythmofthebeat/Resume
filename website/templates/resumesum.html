@@ -495,9 +495,11 @@ function updateNameInStorage(filename, newName) {
 
 function removeHistoryEntry(filename) {
     const currentHistory = JSON.parse(localStorage.getItem("resumeHistory")) || [];
+
     const updatedHistory = currentHistory.filter(
-        (entry) => entry.filename.replace(/\.pdf$/i, "") !== filename
+        (entry) => entry.filename !== filename
     );
+
     localStorage.setItem("resumeHistory", JSON.stringify(updatedHistory));
 }
 
