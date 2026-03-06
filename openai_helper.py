@@ -57,7 +57,7 @@ class OpenAIHelper:
                     },
                 ],
                 max_tokens=300,
-                temperature=0.2,
+                temperature=0.35,
                 timeout=Config.OPENAI_TIMEOUT,
             )
             return response.choices[0].message.content.strip()
@@ -177,4 +177,5 @@ class OpenAIHelper:
 
 
 # Singleton instance for easy import
+
 openai_helper = OpenAIHelper()
