@@ -51,7 +51,6 @@
     fill: none;
     stroke-width: 3.8;
     stroke-linecap: round;
-    stroke: #4a90e2;
     transform: rotate(-90deg);
     transform-origin: 50% 50%;
     transition: stroke-dashoffset 1s ease-out, stroke 0.4s ease;
@@ -136,6 +135,23 @@
         opacity: 0;
         transition: opacity 1s ease;
     }
+    #history-list .history-item {
+    border: 1px solid #eee;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#history-list .history-item:hover {
+    background: #f4f8ff;
+}
+
+.history-score {
+    font-weight: bold;
+    color: var(--primary);
+}
 </style>
 {% endblock %}
 
@@ -149,7 +165,7 @@
     </div>
     
     <div class="row g-4">
-        <div class="col-lg-6">
+        <div class="col-lg-4">
             <div class="card h-100">
                 <div class="card-header">
                     <h3 class="mb-0"><i class="fas fa-file-upload me-2"></i>Upload & Analyze</h3>
@@ -197,7 +213,8 @@
             </div>
         </div>
         
-        <div class="col-lg-6">
+        <div class="col-lg-4">
+            
             <div class="card h-100">
                 <div class="card-header">
                     <h3 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Match Results</h3>
@@ -250,18 +267,43 @@
                             </div>
                         {% endif %}
                     </div>
+                    
                 </div>
             </div>
         </div>
-    </div>
-</div>
-{% endblock %}
+        <div class="col-lg-4">
 
-{% block scripts %}
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history me-2"></i>Saved Results
+                    </h5>
+                </div>
+            
+                <div class="card-body" style="max-height:700px; overflow-y:auto;">
+            
+                    <div id="history-list"></div>
+            
+                    <div id="empty-history" class="text-center text-muted">
+                        No saved analyses yet
+                    </div>
+            
+                </div>
+            </div>
+            
+            </div>
+    </div>
+    
+</div>
+
+
+
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    // Get score value from data attribute
-    const score = parseInt(document.querySelector('.percentage').textContent) || 0;
+    document.addEventListener("DOMContentLoaded", function () {
+    
+        // Get score value from data attribute
+     // Get score value from data attribute
+     const score = parseInt(document.querySelector('.percentage').textContent) || 0;
     const circle = document.querySelector('.circle');
     const text = document.querySelector('.percentage');
     
@@ -373,7 +415,210 @@ document.addEventListener('DOMContentLoaded', function () {
         errorMessage.style.display = 'none';
         overlay.style.display = 'flex';
         form.querySelector('button').disabled = true;
+
+       
     });
+    loadHistory();
+    
+
+    // Run autosave after results exist
+    // AUTO SAVE AFTER PAGE LOAD IF RESULTS EXIST
+    if (document.querySelector(".analysis-content")) {
+        autoSaveResult();
+    }
+    
+    });
+
+
+/* =====================================
+LOAD HISTORY
+===================================== */
+
+function loadHistory() {
+
+const historyList =
+    document.getElementById("history-list");
+
+const empty =
+    document.getElementById("empty-history");
+
+if (!historyList) return;
+
+historyList.innerHTML = "";
+
+let history =
+    JSON.parse(localStorage.getItem("analysisNotes")) || [];
+
+if (history.length === 0) {
+    if (empty) empty.style.display = "block";
+    return;
+}
+
+if (empty) empty.style.display = "none";
+
+history.forEach(item => {
+
+    const div = document.createElement("div");
+    div.className = "border rounded p-2 mb-2";
+
+    div.innerHTML = `
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        
+        <input type="text" 
+               class="form-control form-control-sm title-input"
+               value="${item.title}"
+               style="width:60%;">
+
+        <span class="badge bg-primary">
+            ${item.score}%
+        </span>
+
+    </div>
+
+    <div style="font-size:12px;color:#666">
+        ${item.time}
+    </div>
+
+    <div class="mt-2">
+        <button class="btn btn-sm btn-outline-primary view-btn">
+            View
+        </button>
+
+        <button class="btn btn-sm btn-outline-danger delete-btn">
+            Delete
+        </button>
+    </div>
+`;
+const titleInput = div.querySelector(".title-input");
+
+titleInput.addEventListener("change", () => {
+
+    let history = JSON.parse(localStorage.getItem("analysisNotes")) || [];
+
+    const index = history.findIndex(h => h.id === item.id);
+
+    if (index !== -1) {
+        history[index].title = titleInput.value;
+
+        localStorage.setItem("analysisNotes", JSON.stringify(history));
+    }
 });
-</script>
+    // VIEW
+    div.querySelector(".view-btn").addEventListener("click", () => {
+
+        const jobTextarea =
+            document.querySelector('textarea[name="job_req"]');
+
+        const analysisBox =
+            document.querySelector(".analysis-content");
+
+        const percentBox =
+            document.querySelector(".percentage");
+
+        const circle =
+            document.querySelector(".circle");
+
+            if (jobTextarea) {
+    jobTextarea.value = item.jobText ?? "";
+}
+        if (analysisBox) analysisBox.innerHTML = item.analysis;
+        if (percentBox) percentBox.textContent = item.score + "%";
+        if (circle) {
+    const radius = 15.9155;
+    const circumference = 2 * Math.PI * radius;
+
+    // Reset dash
+    circle.setAttribute("stroke-dasharray", circumference);
+    circle.setAttribute("stroke-dashoffset", circumference);
+
+    // Set color
+    let color;
+
+if (item.score < 30) color = "#dc3545";
+else if (item.score < 61) color = "#ffc107";
+else if (item.score < 81) color = "#4a90e2";
+else color = "#28a745";
+
+circle.style.stroke = color;
+circle.setAttribute("stroke", color);
+
+    // Re-animate to correct score
+    const offset = circumference * (1 - item.score / 100);
+    setTimeout(() => {
+        circle.setAttribute("stroke-dashoffset", offset);
+    }, 100);
+}
+
+    });
+
+    // DELETE
+    div.querySelector(".delete-btn").addEventListener("click", () => {
+
+        let history =
+            JSON.parse(localStorage.getItem("analysisNotes")) || [];
+
+        history =
+            history.filter(h => h.id !== item.id);
+
+        localStorage.setItem(
+            "analysisNotes",
+            JSON.stringify(history)
+        );
+
+        loadHistory();
+    });
+
+    historyList.appendChild(div);
+});
+}
+function autoSaveResult() {
+
+const analysisBox = document.querySelector(".analysis-content");
+const jobTextarea = document.querySelector('textarea[name="job_req"]');
+const percentEl = document.querySelector(".percentage");
+const circle = document.querySelector(".circle");
+
+// Only run if results exist
+if (!analysisBox || !percentEl || !jobTextarea || !circle) return;
+
+const analysis = analysisBox.innerHTML.trim();
+if (analysis.length < 20) return;
+
+const jobText = jobTextarea.value;
+const score = parseInt(percentEl.textContent) || 0;
+const circleColor = circle.getAttribute("stroke");
+
+let history =
+    JSON.parse(localStorage.getItem("analysisNotes")) || [];
+
+const exists = history.some(item =>
+    item.analysis === analysis &&
+    item.jobText === jobText
+);
+
+if (!exists) {
+
+    history.unshift({
+        id: Date.now(),
+        title: "Resume Match",
+        jobText: jobText,
+        score: score,
+        analysis: analysis,
+        circleColor: circleColor,
+        time: new Date().toLocaleString()
+    });
+
+    history = history.slice(0, 20);
+
+    localStorage.setItem(
+        "analysisNotes",
+        JSON.stringify(history)
+    );
+
+    loadHistory();
+}
+}
+
+
+    </script>
 {% endblock %}
