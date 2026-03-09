@@ -7,7 +7,10 @@ from supabase import create_client
 
 # ---------------- Supabase Client ---------------- #
 
-
+supabase = create_client(
+    "https://rfkgkjlfylhtzxevpphs.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJma2dramxmeWxodHp4ZXZwcGhzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM5Mzk3NjEsImV4cCI6MjA3OTUxNTc2MX0.d5kmukDMp2YJZVf_A3T1eBbXDUv_HMu1nDMk4md9vpU"
+)
 
 auth = Blueprint('auth', __name__)
 
@@ -216,29 +219,21 @@ def sign_up():
             flash("Password must be at least 7 characters.", "error")
         else:
             try:
-                # Signup
+                # Attempt signup
                 res = supabase.auth.sign_up({
                     "email": email,
                     "password": password1,
                     "options": {"data": {"full_name": first_name}}
                 })
 
-                # Check if signup succeeded
-                if not res.user:
-                    # If signup failed, try login instead
-                    login_res = supabase.auth.sign_in_with_password({
-                        "email": email,
-                        "password": password1
-                    })
-                    if not login_res.user:
-                        print("Fallback login failed:", login_res.__dict__.get('error'))
-                        flash("Email exists but login failed. Try logging in manually.", "error")
-                        return redirect(url_for("auth.login"))
-                    flash("Email already exists. Logged in automatically.", "success")
-                    supa_user = login_res.user
-                else:
+                if res.user:
+                    # Signup successful
                     flash("Account created successfully!", "success")
                     supa_user = res.user
+                else:
+                    # If no user returned, fallback to generic error
+                    flash("Something went wrong. Try again.", "error")
+                    return redirect(url_for("auth.sign_up"))
 
                 # Ensure local Flask-Login user exists
                 local_user = User.query.filter_by(email=email).first()
@@ -251,10 +246,17 @@ def sign_up():
                     db.session.add(local_user)
                     db.session.commit()
 
+                # Log in the user
                 login_user(local_user, remember=True)
                 return redirect(url_for('views.home'))
 
             except Exception as e:
+                # Detect "already registered" from Supabase
+                if "already registered" in str(e):
+                    flash("Email already exists. Try logging in instead.", "error")
+                    return redirect(url_for("auth.login"))
+
+                # Other unexpected errors
                 print("Signup/login unexpected error:", e)
                 flash("Something went wrong. Try again.", "error")
                 return redirect(url_for("auth.sign_up"))
