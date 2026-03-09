@@ -7,10 +7,7 @@ from supabase import create_client
 
 # ---------------- Supabase Client ---------------- #
 
-supabase = create_client(
-    "https://rfkgkjlfylhtzxevpphs.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJma2dramxmeWxodHp4ZXZwcGhzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM5Mzk3NjEsImV4cCI6MjA3OTUxNTc2MX0.d5kmukDMp2YJZVf_A3T1eBbXDUv_HMu1nDMk4md9vpU"
-)
+
 
 auth = Blueprint('auth', __name__)
 
