@@ -205,7 +205,7 @@ def generate_summary(text):
     """Generate text summary with retry logic"""
     try:
         response = openai.chat.completions.create(
-            model="gpt-4o",
+            model="gpt-3.5-turbo",
             messages=[
                 {
                     "role": "system",
@@ -376,7 +376,7 @@ def generate_summary(text):
     """Generate text summary with retry logic"""
     try:
         response = openai.chat.completions.create(
-            model="gpt-4o",
+            model="gpt-3.5-turbo",
             messages=[
                 {
                     "role": "system",
@@ -614,7 +614,7 @@ def test_pdf():
 @app.route("/test/openai")
 def test_openai():
     """Test OpenAI API connectivity"""
-    models_to_test = ["gpt-4o", "gpt-4-turbo-preview"]
+    models_to_test = ["gpt-3.5-turbo", "gpt-4-turbo-preview"]
     results = {}
 
     for model in models_to_test:
@@ -749,6 +749,6 @@ def export_summary_pdf():
 
 
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))
+    port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port, debug=True)
     
