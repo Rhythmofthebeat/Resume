@@ -574,6 +574,62 @@ def uploads_resume():
 
 
 
+@app.route("/resume-chat", methods=["POST"])
+def resume_chat():
+    """Handle open chat about resume improvements after job match analysis"""
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+
+    user_message = data.get("message", "").strip()
+    job_description = data.get("job_description", "").strip()
+    resume_analysis = data.get("resume_analysis", "").strip()
+    history = data.get("history", [])
+
+    if not user_message:
+        return jsonify({"error": "No message provided"}), 400
+
+    system_prompt = f"""You are an expert career coach and resume advisor. \
+A candidate just received a job match analysis comparing their resume to a job description. \
+Your job is to help them improve their resume based on that analysis.
+
+=== JOB DESCRIPTION ===
+{job_description[:3000] if job_description else 'Not provided'}
+
+=== JOB MATCH ANALYSIS ===
+{resume_analysis[:3000] if resume_analysis else 'Not provided'}
+
+Your role:
+1. Answer any questions about how to strengthen the resume for this specific role.
+2. Suggest concrete, actionable edits (new bullet points, skills to add, phrasing changes).
+3. Point out gaps between the job requirements and the resume.
+4. Be encouraging and honest.
+5. Keep responses clear and concise — avoid fluff.
+"""
+
+    messages = [{"role": "system", "content": system_prompt}]
+
+    # Include up to the last 20 turns of conversation history
+    for msg in history[-20:]:
+        if msg.get("role") in ("user", "assistant") and msg.get("content"):
+            messages.append({"role": msg["role"], "content": msg["content"]})
+
+    messages.append({"role": "user", "content": user_message})
+
+    try:
+        response = openai.chat.completions.create(
+            model="gpt-4o",
+            messages=messages,
+            max_tokens=800,
+            temperature=0.7,
+        )
+        reply = response.choices[0].message.content.strip()
+        return jsonify({"reply": reply})
+    except Exception as e:
+        logger.error(f"Resume chat API error: {str(e)}")
+        return jsonify({"error": "Failed to get a response. Please try again."}), 500
+
+
 @app.route("/health")
 def health_check():
     """Health check endpoint"""
