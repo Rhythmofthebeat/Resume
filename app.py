@@ -91,7 +91,7 @@ def extract_text_from_file(filename: str, resume_bytes: bytes):
     return ""
 def compare_resume_to_job(job_description, resume):
     prompt = f"""
-Given the following job description and resume, rate how well the resume matches the job description. Provide a score out of 100 and a short explanation.
+Given the following job description and resume, rate how well the resume matches the job description.
 
 Job Description:
 {job_description}
@@ -99,23 +99,37 @@ Job Description:
 Resume:
 {resume}
 
+Respond EXACTLY in this format (no asterisks, no markdown bold):
 
-Respond with:
-Score: (number and write word based on number)
-            0-30: Poor
-            31-60: Fair
-            61-80: Good 
-            81-100: Excellent
-score can be from 0-100
-Explanation: 
-(remove all asteriks)
-    -What key job requirments the resume matches
-    -What key job requirments the resume does not match
-    -Education(High school, College, Degrees)
-    -Skillset/Technical Skills
-    -Experience/Internships
-    -Links of projects (provide the ALL links in the resume and DO NOT repeat the SAME links)
-(your reasoning by mentioning ALL specific parts of the resume that goes along with the job description. Show picture and highlight the places)
+Score: <number 0-100> (<Poor / Fair / Good / Excellent>)
+
+Explanation:
+
+What the resume MATCHES (prefix each bullet with +):
++ <specific match>
++ <specific match>
+
+What the resume is MISSING or does not match (prefix each bullet with -):
+- <specific gap>
+- <specific gap>
+
+Education:
++ or - <education match/gap>
+
+Skills / Technical:
++ or - <skill match or gap>
+
+Experience / Internships:
++ or - <experience match or gap>
+
+Project Links (list ALL links found in the resume, no duplicates):
+<link>
+
+Rules:
+- Use + at the start of every line that is a STRENGTH or MATCH
+- Use - at the start of every line that is a GAP or MISSING requirement
+- Remove all asterisks
+- Be specific — mention exact skills, tools, and requirements from the job description
 """
     response = openai.chat.completions.create(
         model="gpt-4o",
@@ -589,22 +603,26 @@ def resume_chat():
     if not user_message:
         return jsonify({"error": "No message provided"}), 400
 
+    has_context = bool(job_description.strip() or resume_analysis.strip())
+    context_block = ""
+    if job_description.strip():
+        context_block += f"\n=== JOB DESCRIPTION ===\n{job_description[:2000]}\n"
+    if resume_analysis.strip():
+        context_block += f"\n=== MATCH ANALYSIS ===\n{resume_analysis[:2000]}\n"
+
     system_prompt = f"""You are an expert career coach and resume advisor. \
-A candidate just received a job match analysis comparing their resume to a job description. \
-Your job is to help them improve their resume based on that analysis.
+Your job is to help the user improve their resume in any way they ask — \
+whether that is fixing a specific section, adding skills, rewriting bullet points, \
+improving formatting, addressing gaps for a specific job, or general best practices.
 
-=== JOB DESCRIPTION ===
-{job_description[:3000] if job_description else 'Not provided'}
+{"You have the following context about the candidate's resume and job match:" + context_block if has_context else ""}
 
-=== JOB MATCH ANALYSIS ===
-{resume_analysis[:3000] if resume_analysis else 'Not provided'}
-
-Your role:
-1. Answer any questions about how to strengthen the resume for this specific role.
-2. Suggest concrete, actionable edits (new bullet points, skills to add, phrasing changes).
-3. Point out gaps between the job requirements and the resume.
-4. Be encouraging and honest.
-5. Keep responses clear and concise — avoid fluff.
+Guidelines:
+- Answer ANY question about resume improvement, not just job-match questions.
+- Give concrete, specific suggestions — rewritten bullet points, exact skills to add, phrasing examples.
+- Be honest about weaknesses and encouraging about strengths.
+- Keep responses focused and easy to act on.
+- If the user asks something unrelated to resumes or careers, politely redirect them.
 """
 
     messages = [{"role": "system", "content": system_prompt}]
