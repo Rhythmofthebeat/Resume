@@ -342,27 +342,30 @@
 
                     <div class="result-box">
                         <h5 class="mb-3">Detailed Analysis</h5>
-                        {% if result %}
-                            <div class="analysis-content">
+                        {# .analysis-content is ALWAYS in the DOM so the View button can always populate it #}
+                        <div class="analysis-content">
+                            {% if result %}
                                 {% set lines = result.split('\n') %}
                                 {% for line in lines %}
                                     {% if line.strip() %}
                                         {% if 'score' in line.lower() %}
                                             <p class="fw-bold fs-6">{{ line }}</p>
-                                        {% elif line.startswith('-') %}
+                                        {% elif line.startswith('+') %}
                                             <p class="ms-3"><i class="fas fa-check-circle text-success me-2"></i>{{ line[1:].strip() }}</p>
+                                        {% elif line.startswith('-') %}
+                                            <p class="ms-3"><i class="fas fa-times-circle text-danger me-2"></i>{{ line[1:].strip() }}</p>
                                         {% else %}
                                             <p>{{ line }}</p>
                                         {% endif %}
                                     {% endif %}
                                 {% endfor %}
-                            </div>
-                        {% else %}
-                            <div class="text-center py-5">
-                                <i class="fas fa-file-search fa-3x text-muted mb-3"></i>
-                                <p class="text-muted">Submit a job description and resume to see the match analysis</p>
-                            </div>
-                        {% endif %}
+                            {% else %}
+                                <div class="text-center py-5" id="analysis-empty-state">
+                                    <i class="fas fa-file-search fa-3x text-muted mb-3"></i>
+                                    <p class="text-muted">Submit a job description and resume to see the match analysis</p>
+                                </div>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -656,7 +659,12 @@ titleInput.addEventListener("change", () => {
             if (jobTextarea) {
     jobTextarea.value = item.jobText ?? "";
 }
-        if (analysisBox) analysisBox.innerHTML = item.analysis;
+        if (analysisBox) {
+            analysisBox.innerHTML = item.analysis;
+            // Remove empty-state placeholder if it's still there
+            const emptyState = analysisBox.querySelector('#analysis-empty-state');
+            if (emptyState) emptyState.remove();
+        }
         if (percentBox) percentBox.textContent = item.score + "%";
         if (circle) {
     const radius = 15.9155;
