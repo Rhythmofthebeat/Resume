@@ -311,9 +311,10 @@
             </div>
         </div>
         
-        <div class="col-lg-4">
-            
-            <div class="card h-100">
+        <!-- ── Match Results + Chat (stacked, wider column) ─── -->
+        <div class="col-lg-5">
+
+            <div class="card">
                 <div class="card-header">
                     <h3 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Match Results</h3>
                 </div>
@@ -322,16 +323,14 @@
                         <div class="score-circle mx-auto">
                             <svg viewBox="0 0 36 36" class="circular-chart">
                                 <path class="circle-bg"
-      stroke="#eee"
-      d="M18 2.0845
-         a 15.9155 15.9155 0 0 1 0 31.831
-         a 15.9155 15.9155 0 0 1 0 -31.831" />
-
-<path class="circle"
-      d="M18 2.0845
-         a 15.9155 15.9155 0 0 1 0 31.831
-         a 15.9155 15.9155 0 0 1 0 -31.831" />
-
+                                      stroke="#eee"
+                                      d="M18 2.0845
+                                         a 15.9155 15.9155 0 0 1 0 31.831
+                                         a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                <path class="circle"
+                                      d="M18 2.0845
+                                         a 15.9155 15.9155 0 0 1 0 31.831
+                                         a 15.9155 15.9155 0 0 1 0 -31.831" />
                                 <text x="18" y="18" class="percentage">{{ score_value or 0 }}%</text>
                             </svg>
                         </div>
@@ -340,7 +339,7 @@
                             0-30: Poor | 31-60: Fair | 61-80: Good | 81-100: Excellent
                         </p>
                     </div>
-                    
+
                     <div class="result-box">
                         <h5 class="mb-3">Detailed Analysis</h5>
                         {% if result %}
@@ -365,52 +364,25 @@
                             </div>
                         {% endif %}
                     </div>
-                    
                 </div>
             </div>
-        </div>
-        <div class="col-lg-4">
 
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-history me-2"></i>Saved Results
-                    </h5>
-                </div>
-            
-                <div class="card-body" style="max-height:700px; overflow-y:auto;">
-            
-                    <div id="history-list"></div>
-            
-                    <div id="empty-history" class="text-center text-muted">
-                        No saved analyses yet
-                    </div>
-            
-                </div>
-            </div>
-            
-            </div>
-    </div><!-- /row g-4 -->
-
-    {% if result %}
-    <!-- ── Open Chat ─────────────────────────────────────────────── -->
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="card">
+            <!-- ── Chat card — directly under Match Results ── -->
+            <div class="card mt-3" id="chat-card" {% if not result %}style="display:none;"{% endif %}>
                 <div class="card-header d-flex align-items-center gap-2">
                     <i class="fas fa-comments fa-lg"></i>
-                    <h4 class="mb-0">Ask About Your Resume</h4>
+                    <h5 class="mb-0">Ask About Your Resume</h5>
                 </div>
                 <div class="card-body">
-                    <p class="text-muted mb-3">
-                        Chat with AI to get specific, actionable advice on improving your resume for this role.
+                    <p class="text-muted small mb-3">
+                        Ask anything — missing skills, how to rewrite bullet points, gaps to address, formatting tips, and more.
                     </p>
 
                     <div id="chat-messages" class="chat-messages">
                         <!-- Initial AI greeting -->
                         <div class="chat-message ai-msg">
                             <div class="chat-avatar ai"><i class="fas fa-robot"></i></div>
-                            <div class="chat-bubble ai-bubble">Hi! I've reviewed your job match analysis. Ask me anything — which skills to add, how to reframe your experience, which sections to expand, or anything else that could make your resume stronger for this role. What would you like to improve?</div>
+                            <div class="chat-bubble ai-bubble">Hi! I've reviewed your job match analysis. What would you like to improve on your resume? I can suggest specific changes, highlight missing skills, or help you rewrite sections.</div>
                         </div>
                         <!-- Typing indicator (hidden by default) -->
                         <div id="chat-typing" class="chat-message ai-msg" style="display:none;">
@@ -426,18 +398,36 @@
                     <div class="chat-input-row">
                         <input type="text" id="chat-input" class="form-control"
                                placeholder="e.g. What skills am I missing for this job?" />
-                        <button id="chat-send" class="btn btn-primary">
-                            <i class="fas fa-paper-plane me-1"></i>Send
+                        <button id="chat-send" class="btn btn-primary btn-sm px-3">
+                            <i class="fas fa-paper-plane"></i>
                         </button>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    {# Store context as JSON so the JS linter never sees raw Jinja2 braces #}
-    <script type="application/json" id="resume-chat-data">{{ {"jobText": job_text, "analysis": result} | tojson }}</script>
-    {% endif %}
+        </div>
+
+        <!-- ── Saved Results ── -->
+        <div class="col-lg-3">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history me-2"></i>Saved Results
+                    </h5>
+                </div>
+                <div class="card-body" style="max-height:700px; overflow-y:auto;">
+                    <div id="history-list"></div>
+                    <div id="empty-history" class="text-center text-muted">
+                        No saved analyses yet
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /row g-4 -->
+
+    {# Always present — provides initial context; JS can override via updateChatContext() #}
+    <script type="application/json" id="resume-chat-data">{{ {"jobText": job_text or "", "analysis": result or ""} | tojson }}</script>
 
 </div><!-- /container-fluid -->
 
@@ -694,6 +684,16 @@ circle.setAttribute("stroke", color);
     }, 100);
 }
 
+        // ── Update chat with this saved result ────────────────────
+        if (typeof window.updateChatContext === 'function') {
+            window.updateChatContext(item.jobText || '', item.analysis || '');
+        }
+        const chatCard = document.getElementById('chat-card');
+        if (chatCard) {
+            chatCard.style.display = '';
+            setTimeout(() => chatCard.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
+        }
+
     });
 
     // DELETE
@@ -776,8 +776,8 @@ if (!exists) {
     try { chatCtx = JSON.parse(dataEl.textContent); }
     catch (e) { chatCtx = { jobText: '', analysis: '' }; }
 
-    const chatJobText  = chatCtx.jobText  || '';
-    const chatAnalysis = chatCtx.analysis || '';
+    let chatJobText  = chatCtx.jobText  || '';
+    let chatAnalysis = chatCtx.analysis || '';
 
     const messagesEl = document.getElementById('chat-messages');
     const typingEl   = document.getElementById('chat-typing');
@@ -785,6 +785,26 @@ if (!exists) {
     const sendBtn    = document.getElementById('chat-send');
 
     const conversationHistory = [];   // [{role, content}, …]
+
+    // ── context switch (called by "View" in history panel) ────
+    window.updateChatContext = function (jobText, analysis) {
+        chatJobText  = jobText;
+        chatAnalysis = analysis;
+
+        // Clear conversation history
+        conversationHistory.length = 0;
+
+        // Remove all bubbles except the typing indicator
+        while (messagesEl.firstChild && messagesEl.firstChild !== typingEl) {
+            messagesEl.removeChild(messagesEl.firstChild);
+        }
+
+        // New greeting
+        appendMessage('ai',
+            "I've loaded a saved analysis. What would you like to improve on your resume for this role? " +
+            "Ask me about missing skills, experience gaps, formatting, or anything else."
+        );
+    };
 
     // ── helpers ───────────────────────────────────────────────
     function escapeHtml(str) {
