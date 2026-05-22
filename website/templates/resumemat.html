@@ -155,7 +155,8 @@
 
 /* ── Chat Section ─────────────────────────────── */
 .chat-messages {
-    height: 360px;
+    flex: 1;
+    min-height: 220px;
     overflow-y: auto;
     padding: 14px;
     background: #f8f9fa;
@@ -311,9 +312,11 @@
             </div>
         </div>
         
-        <!-- ── Match Results ── -->
-        <div class="col-lg-4">
-            <div class="card h-100">
+        <!-- ── Match Results + Chat (stacked, centre column) ── -->
+        <div class="col-lg-4 d-flex flex-column gap-3">
+
+            <!-- Match Results -->
+            <div class="card">
                 <div class="card-header">
                     <h3 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Match Results</h3>
                 </div>
@@ -368,6 +371,56 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Resume Coach Chat — directly below the analysis text -->
+            <div class="card" id="chat-card">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="fas fa-robot fa-lg"></i>
+                        <h5 class="mb-0">Resume Coach</h5>
+                    </div>
+                    <span class="badge bg-light text-primary fw-normal" style="font-size:0.75rem;">
+                        Powered by GPT-4o
+                    </span>
+                </div>
+                <div class="card-body d-flex flex-column" style="padding:14px;">
+                    <div id="chat-messages" class="chat-messages" style="min-height:180px; max-height:320px;">
+                        <!-- Initial AI greeting -->
+                        <div class="chat-message ai-msg">
+                            <div class="chat-avatar ai"><i class="fas fa-robot"></i></div>
+                            <div class="chat-bubble ai-bubble">
+                                👋 Hi! I'm your Resume Coach. Ask me anything — how to improve your resume,
+                                what skills to add, how to rewrite bullet points, or how well you match this role.
+                                Run a job match above for personalised advice!
+                            </div>
+                        </div>
+                        <!-- Typing indicator -->
+                        <div id="chat-typing" class="chat-message ai-msg" style="display:none;">
+                            <div class="chat-avatar ai"><i class="fas fa-robot"></i></div>
+                            <div class="typing-bubble">
+                                <span class="dot"></span>
+                                <span class="dot"></span>
+                                <span class="dot"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chat-input-row" style="margin-top:10px;">
+                        <input type="text" id="chat-input" class="form-control form-control-sm"
+                               placeholder="Ask anything about your resume…" />
+                        <button id="chat-send" class="btn btn-primary btn-sm px-3">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                    <div class="mt-2 d-flex flex-wrap gap-1" id="chat-suggestions">
+                        <button class="btn btn-outline-secondary btn-sm suggestion-btn" style="font-size:0.75rem;">What skills am I missing?</button>
+                        <button class="btn btn-outline-secondary btn-sm suggestion-btn" style="font-size:0.75rem;">Improve my bullet points</button>
+                        <button class="btn btn-outline-secondary btn-sm suggestion-btn" style="font-size:0.75rem;">Is my resume too long?</button>
+                        <button class="btn btn-outline-secondary btn-sm suggestion-btn" style="font-size:0.75rem;">What goes in my summary?</button>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
         <!-- ── Saved Results ── -->
@@ -388,71 +441,6 @@
         </div>
 
     </div><!-- /row g-4 -->
-
-    <!-- ══════════════════════════════════════════════════════
-         RESUME COACH CHAT  — always visible, full width
-    ═══════════════════════════════════════════════════════ -->
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="card" id="chat-card">
-                <div class="card-header d-flex align-items-center justify-content-between">
-                    <div class="d-flex align-items-center gap-2">
-                        <i class="fas fa-robot fa-lg"></i>
-                        <h4 class="mb-0">Resume Coach</h4>
-                    </div>
-                    <span class="badge bg-light text-primary fw-normal" style="font-size:0.8rem;">
-                        Powered by GPT-4o
-                    </span>
-                </div>
-                <div class="card-body">
-                    <p class="text-muted mb-3">
-                        Ask me <strong>anything</strong> about your resume — how to improve it, what to add or cut,
-                        how to rewrite bullet points, what skills to highlight, formatting tips, and more.
-                        Run a job match above for personalized advice about a specific role.
-                    </p>
-
-                    <div id="chat-messages" class="chat-messages" style="height:460px;">
-                        <!-- Initial AI greeting -->
-                        <div class="chat-message ai-msg">
-                            <div class="chat-avatar ai"><i class="fas fa-robot"></i></div>
-                            <div class="chat-bubble ai-bubble">
-                                👋 Hi! I'm your personal Resume Coach. I can help you with:<br><br>
-                                • <strong>Improving bullet points</strong> — making them more impactful<br>
-                                • <strong>Missing skills</strong> — what to add for a specific role<br>
-                                • <strong>Formatting &amp; structure</strong> — what recruiters actually want to see<br>
-                                • <strong>Experience gaps</strong> — how to address them<br>
-                                • <strong>Tailoring your resume</strong> — for a specific job description<br><br>
-                                Run a job match above for context-specific advice, or just ask me anything right now!
-                            </div>
-                        </div>
-                        <!-- Typing indicator -->
-                        <div id="chat-typing" class="chat-message ai-msg" style="display:none;">
-                            <div class="chat-avatar ai"><i class="fas fa-robot"></i></div>
-                            <div class="typing-bubble">
-                                <span class="dot"></span>
-                                <span class="dot"></span>
-                                <span class="dot"></span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="chat-input-row mt-3">
-                        <input type="text" id="chat-input" class="form-control form-control-lg"
-                               placeholder="Ask anything about your resume…" />
-                        <button id="chat-send" class="btn btn-primary px-4">
-                            <i class="fas fa-paper-plane me-1"></i> Send
-                        </button>
-                    </div>
-                    <div class="mt-2 d-flex flex-wrap gap-2" id="chat-suggestions">
-                        <button class="btn btn-outline-secondary btn-sm suggestion-btn">What skills am I missing?</button>
-                        <button class="btn btn-outline-secondary btn-sm suggestion-btn">How can I improve my bullet points?</button>
-                        <button class="btn btn-outline-secondary btn-sm suggestion-btn">Is my resume too long?</button>
-                        <button class="btn btn-outline-secondary btn-sm suggestion-btn">What should I put in my summary?</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
     {# Always present — provides initial context; JS can override via updateChatContext() #}
     <script type="application/json" id="resume-chat-data">{{ {"jobText": job_text or "", "analysis": result or ""} | tojson }}</script>
@@ -593,7 +581,6 @@
     loadHistory();
 
     // AUTO SAVE — only when the server actually returned a result.
-    // Read from the JSON data element (set by Jinja2) to avoid Jinja2 tags inside <script>.
     (function () {
         const _d = document.getElementById('resume-chat-data');
         if (!_d) return;
@@ -603,6 +590,68 @@
                 autoSaveResult();
             }
         } catch (e) { /* ignore parse errors */ }
+    })();
+
+    // AUTO RESTORE — if the server sent no results (e.g. after a page refresh),
+    // silently reload the most recent saved analysis so nothing is lost.
+    (function () {
+        const _d = document.getElementById('resume-chat-data');
+        if (!_d) return;
+        try {
+            const _ctx = JSON.parse(_d.textContent);
+            // Skip if the server already provided fresh results
+            if (_ctx.analysis && _ctx.analysis.trim().length > 10) return;
+
+            const saved = JSON.parse(localStorage.getItem("analysisNotes")) || [];
+            if (saved.length === 0) return;
+            const latest = saved[0];
+            if (!latest.analysis || latest.analysis.trim().length < 20) return;
+
+            // Restore the analysis text
+            const analysisBox = document.querySelector(".analysis-content");
+            if (analysisBox) {
+                analysisBox.innerHTML = latest.analysis;
+                const emptyState = analysisBox.querySelector('#analysis-empty-state');
+                if (emptyState) emptyState.remove();
+            }
+
+            // Restore the job description textarea
+            const jobTextarea = document.querySelector('textarea[name="job_req"]');
+            if (jobTextarea && latest.jobText) jobTextarea.value = latest.jobText;
+
+            // Restore the score text and circle
+            const percentBox = document.querySelector(".percentage");
+            if (percentBox) percentBox.textContent = latest.score + "%";
+
+            const circleEl = document.querySelector(".circle");
+            if (circleEl) {
+                const r = 15.9155;
+                const circ = 2 * Math.PI * r;
+                circleEl.setAttribute("stroke-dasharray", circ);
+
+                let col;
+                if (latest.score < 30)      col = "#dc3545";
+                else if (latest.score < 61) col = "#ffc107";
+                else if (latest.score < 81) col = "#4a90e2";
+                else                        col = "#28a745";
+                circleEl.style.stroke = col;
+                circleEl.setAttribute("stroke", col);
+
+                // Animate the arc after a short delay so the CSS transition plays
+                setTimeout(() => {
+                    circleEl.setAttribute("stroke-dashoffset", circ * (1 - latest.score / 100));
+                }, 200);
+            }
+
+            // Load the restored analysis into the chat context
+            if (typeof window.updateChatContext === 'function') {
+                const tmp = document.createElement('div');
+                tmp.innerHTML = latest.analysis;
+                const plain = (tmp.textContent || tmp.innerText || '').trim();
+                window.updateChatContext(latest.jobText || '', plain);
+            }
+
+        } catch (e) { /* ignore */ }
     })();
 
     });
