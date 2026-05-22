@@ -351,11 +351,17 @@
                                         {% if 'score' in line.lower() %}
                                             <p class="fw-bold fs-6">{{ line }}</p>
                                         {% elif line.startswith('+') %}
-                                            <p class="ms-3"><i class="fas fa-check-circle text-success me-2"></i>{{ line[1:].strip() }}</p>
+                                            <p class="ms-2 mb-1">
+                                                <i class="fa-solid fa-circle-check text-success me-1"></i>
+                                                <span>{{ line[1:].strip() }}</span>
+                                            </p>
                                         {% elif line.startswith('-') %}
-                                            <p class="ms-3"><i class="fas fa-times-circle text-danger me-2"></i>{{ line[1:].strip() }}</p>
+                                            <p class="ms-2 mb-1">
+                                                <i class="fa-solid fa-circle-xmark text-danger me-1"></i>
+                                                <span class="text-danger">{{ line[1:].strip() }}</span>
+                                            </p>
                                         {% else %}
-                                            <p>{{ line }}</p>
+                                            <p class="mb-1 fw-semibold">{{ line }}</p>
                                         {% endif %}
                                     {% endif %}
                                 {% endfor %}
