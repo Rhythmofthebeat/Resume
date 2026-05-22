@@ -311,10 +311,9 @@
             </div>
         </div>
         
-        <!-- ── Match Results + Chat (stacked, wider column) ─── -->
-        <div class="col-lg-5">
-
-            <div class="card">
+        <!-- ── Match Results ── -->
+        <div class="col-lg-4">
+            <div class="card h-100">
                 <div class="card-header">
                     <h3 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Match Results</h3>
                 </div>
@@ -342,7 +341,7 @@
 
                     <div class="result-box">
                         <h5 class="mb-3">Detailed Analysis</h5>
-                        {# .analysis-content is ALWAYS in the DOM so the View button can always populate it #}
+                        {# .analysis-content is ALWAYS in the DOM so the View button can populate it #}
                         <div class="analysis-content">
                             {% if result %}
                                 {% set lines = result.split('\n') %}
@@ -369,49 +368,10 @@
                     </div>
                 </div>
             </div>
-
-            <!-- ── Chat card — directly under Match Results ── -->
-            <div class="card mt-3" id="chat-card" {% if not result %}style="display:none;"{% endif %}>
-                <div class="card-header d-flex align-items-center gap-2">
-                    <i class="fas fa-comments fa-lg"></i>
-                    <h5 class="mb-0">Ask About Your Resume</h5>
-                </div>
-                <div class="card-body">
-                    <p class="text-muted small mb-3">
-                        Ask anything — missing skills, how to rewrite bullet points, gaps to address, formatting tips, and more.
-                    </p>
-
-                    <div id="chat-messages" class="chat-messages">
-                        <!-- Initial AI greeting -->
-                        <div class="chat-message ai-msg">
-                            <div class="chat-avatar ai"><i class="fas fa-robot"></i></div>
-                            <div class="chat-bubble ai-bubble">Hi! I've reviewed your job match analysis. What would you like to improve on your resume? I can suggest specific changes, highlight missing skills, or help you rewrite sections.</div>
-                        </div>
-                        <!-- Typing indicator (hidden by default) -->
-                        <div id="chat-typing" class="chat-message ai-msg" style="display:none;">
-                            <div class="chat-avatar ai"><i class="fas fa-robot"></i></div>
-                            <div class="typing-bubble">
-                                <span class="dot"></span>
-                                <span class="dot"></span>
-                                <span class="dot"></span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="chat-input-row">
-                        <input type="text" id="chat-input" class="form-control"
-                               placeholder="e.g. What skills am I missing for this job?" />
-                        <button id="chat-send" class="btn btn-primary btn-sm px-3">
-                            <i class="fas fa-paper-plane"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
         </div>
 
         <!-- ── Saved Results ── -->
-        <div class="col-lg-3">
+        <div class="col-lg-4">
             <div class="card h-100">
                 <div class="card-header">
                     <h5 class="mb-0">
@@ -428,6 +388,71 @@
         </div>
 
     </div><!-- /row g-4 -->
+
+    <!-- ══════════════════════════════════════════════════════
+         RESUME COACH CHAT  — always visible, full width
+    ═══════════════════════════════════════════════════════ -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card" id="chat-card">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="fas fa-robot fa-lg"></i>
+                        <h4 class="mb-0">Resume Coach</h4>
+                    </div>
+                    <span class="badge bg-light text-primary fw-normal" style="font-size:0.8rem;">
+                        Powered by GPT-4o
+                    </span>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-3">
+                        Ask me <strong>anything</strong> about your resume — how to improve it, what to add or cut,
+                        how to rewrite bullet points, what skills to highlight, formatting tips, and more.
+                        Run a job match above for personalized advice about a specific role.
+                    </p>
+
+                    <div id="chat-messages" class="chat-messages" style="height:460px;">
+                        <!-- Initial AI greeting -->
+                        <div class="chat-message ai-msg">
+                            <div class="chat-avatar ai"><i class="fas fa-robot"></i></div>
+                            <div class="chat-bubble ai-bubble">
+                                👋 Hi! I'm your personal Resume Coach. I can help you with:<br><br>
+                                • <strong>Improving bullet points</strong> — making them more impactful<br>
+                                • <strong>Missing skills</strong> — what to add for a specific role<br>
+                                • <strong>Formatting &amp; structure</strong> — what recruiters actually want to see<br>
+                                • <strong>Experience gaps</strong> — how to address them<br>
+                                • <strong>Tailoring your resume</strong> — for a specific job description<br><br>
+                                Run a job match above for context-specific advice, or just ask me anything right now!
+                            </div>
+                        </div>
+                        <!-- Typing indicator -->
+                        <div id="chat-typing" class="chat-message ai-msg" style="display:none;">
+                            <div class="chat-avatar ai"><i class="fas fa-robot"></i></div>
+                            <div class="typing-bubble">
+                                <span class="dot"></span>
+                                <span class="dot"></span>
+                                <span class="dot"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chat-input-row mt-3">
+                        <input type="text" id="chat-input" class="form-control form-control-lg"
+                               placeholder="Ask anything about your resume…" />
+                        <button id="chat-send" class="btn btn-primary px-4">
+                            <i class="fas fa-paper-plane me-1"></i> Send
+                        </button>
+                    </div>
+                    <div class="mt-2 d-flex flex-wrap gap-2" id="chat-suggestions">
+                        <button class="btn btn-outline-secondary btn-sm suggestion-btn">What skills am I missing?</button>
+                        <button class="btn btn-outline-secondary btn-sm suggestion-btn">How can I improve my bullet points?</button>
+                        <button class="btn btn-outline-secondary btn-sm suggestion-btn">Is my resume too long?</button>
+                        <button class="btn btn-outline-secondary btn-sm suggestion-btn">What should I put in my summary?</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     {# Always present — provides initial context; JS can override via updateChatContext() #}
     <script type="application/json" id="resume-chat-data">{{ {"jobText": job_text or "", "analysis": result or ""} | tojson }}</script>
@@ -556,15 +581,30 @@
 
        
     });
-    loadHistory();
-    
+    // Remove junk entries that were saved when no real result existed
+    // (score 0 + empty jobText = corrupted entry from the old broken guard)
+    (function cleanJunkSaves() {
+        let h = JSON.parse(localStorage.getItem("analysisNotes")) || [];
+        const before = h.length;
+        h = h.filter(item => item.score > 0 || (item.jobText && item.jobText.trim().length > 0));
+        if (h.length !== before) localStorage.setItem("analysisNotes", JSON.stringify(h));
+    })();
 
-    // Run autosave after results exist
-    // AUTO SAVE AFTER PAGE LOAD IF RESULTS EXIST
-    if (document.querySelector(".analysis-content")) {
-        autoSaveResult();
-    }
-    
+    loadHistory();
+
+    // AUTO SAVE — only when the server actually returned a result.
+    // Read from the JSON data element (set by Jinja2) to avoid Jinja2 tags inside <script>.
+    (function () {
+        const _d = document.getElementById('resume-chat-data');
+        if (!_d) return;
+        try {
+            const _ctx = JSON.parse(_d.textContent);
+            if (_ctx.analysis && _ctx.analysis.trim().length > 10) {
+                autoSaveResult();
+            }
+        } catch (e) { /* ignore parse errors */ }
+    })();
+
     });
 
 
@@ -599,32 +639,31 @@ history.forEach(item => {
     const div = document.createElement("div");
     div.className = "border rounded p-2 mb-2";
 
+    // Extract plain-text preview from stored HTML analysis
+    const _tmp = document.createElement('div');
+    _tmp.innerHTML = item.analysis || '';
+    const _rawText = (_tmp.textContent || _tmp.innerText || '').replace(/\s+/g, ' ').trim();
+    const _preview = _rawText.length > 0
+        ? _rawText.substring(0, 140) + (_rawText.length > 140 ? '…' : '')
+        : '';
+
+    // Safely escape the title for use inside an HTML attribute
+    const _safeTitle = (item.title || 'Resume Match')
+        .replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+
     div.innerHTML = `
     <div style="display:flex; justify-content:space-between; align-items:center;">
-        
-        <input type="text" 
+        <input type="text"
                class="form-control form-control-sm title-input"
-               value="${item.title}"
+               value="${_safeTitle}"
                style="width:60%;">
-
-        <span class="badge bg-primary">
-            ${item.score}%
-        </span>
-
+        <span class="badge bg-primary">${item.score}%</span>
     </div>
-
-    <div style="font-size:12px;color:#666">
-        ${item.time}
-    </div>
-
+    <div style="font-size:12px;color:#666;">${item.time}</div>
+    ${_preview ? `<div style="font-size:11px;color:#555;margin-top:5px;line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${_preview}</div>` : ''}
     <div class="mt-2">
-        <button class="btn btn-sm btn-outline-primary view-btn">
-            View
-        </button>
-
-        <button class="btn btn-sm btn-outline-danger delete-btn">
-            Delete
-        </button>
+        <button class="btn btn-sm btn-outline-primary view-btn">View</button>
+        <button class="btn btn-sm btn-outline-danger delete-btn">Delete</button>
     </div>
 `;
 const titleInput = div.querySelector(".title-input");
@@ -692,13 +731,16 @@ circle.setAttribute("stroke", color);
     }, 100);
 }
 
-        // ── Update chat with this saved result ────────────────────
+        // ── Update chat with this saved result (pass plain text, not HTML) ──
         if (typeof window.updateChatContext === 'function') {
-            window.updateChatContext(item.jobText || '', item.analysis || '');
+            const _chatTmp = document.createElement('div');
+            _chatTmp.innerHTML = item.analysis || '';
+            const _plainAnalysis = (_chatTmp.textContent || _chatTmp.innerText || '').trim();
+            window.updateChatContext(item.jobText || '', _plainAnalysis);
         }
+        // Scroll to chat so user notices it updated
         const chatCard = document.getElementById('chat-card');
         if (chatCard) {
-            chatCard.style.display = '';
             setTimeout(() => chatCard.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
         }
 
@@ -777,12 +819,13 @@ if (!exists) {
    RESUME CHAT
    ============================================================ */
 (function () {
+    // resume-chat-data is always rendered in the template; read context if available
     const dataEl = document.getElementById('resume-chat-data');
-    if (!dataEl) return;   // chat section only rendered when results exist
-
-    let chatCtx;
-    try { chatCtx = JSON.parse(dataEl.textContent); }
-    catch (e) { chatCtx = { jobText: '', analysis: '' }; }
+    let chatCtx = { jobText: '', analysis: '' };
+    if (dataEl) {
+        try { chatCtx = JSON.parse(dataEl.textContent); }
+        catch (e) { /* keep defaults */ }
+    }
 
     let chatJobText  = chatCtx.jobText  || '';
     let chatAnalysis = chatCtx.analysis || '';
@@ -791,6 +834,9 @@ if (!exists) {
     const typingEl   = document.getElementById('chat-typing');
     const inputEl    = document.getElementById('chat-input');
     const sendBtn    = document.getElementById('chat-send');
+
+    // Bail out only if the chat UI elements are genuinely missing
+    if (!messagesEl || !typingEl || !inputEl || !sendBtn) return;
 
     const conversationHistory = [];   // [{role, content}, …]
 
@@ -902,6 +948,15 @@ if (!exists) {
             e.preventDefault();
             sendMessage();
         }
+    });
+
+    // ── Quick suggestion chips ────────────────────────────
+    document.querySelectorAll('.suggestion-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            inputEl.value = btn.textContent.trim();
+            inputEl.focus();
+            sendMessage();
+        });
     });
 })();
 
