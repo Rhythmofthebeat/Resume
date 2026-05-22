@@ -140,59 +140,48 @@ Rules:
 @app.route('/', methods=['GET', 'POST'])
 def index():
     result = None
-    score_value = 0 #so score is always defined
+    score_value = 0       # always defined
+    cleaned_result = None # always defined — avoids NameError on GET
+    job_text = ''         # always defined
 
     if request.method == 'POST':
-        job_text = request.form.get('job_req')
+        job_text = request.form.get('job_req', '')
         resume_file = request.files.get('resume')
-        
-        
 
         if not job_text.strip() or not resume_file:
-            return render_template('resumemat.html', result=None, score_value=0,  job_text=job_text)
+            return render_template('resumemat.html', result=None, score_value=0, job_text=job_text)
 
         resume_bytes = resume_file.read()
         resume_file.stream.seek(0)  # Reset stream for further processing
-        
 
-        # Generate cache key from job text + resume bytes
-        #hash_key = generate_hash(job_text, resume_bytes)
-
-        # Try loading cached result
-        # cached = get_cached_result(hash_key)
-        #if cached:
-            #return render_template('resumemat.html', result=cached["result"], score_value=cached["score"],  job_text=job_text)
-
-        # Call GPT if not cached
+        # Call GPT
         resume_text = extract_text_from_file(resume_file.filename, resume_bytes)
 
-
-        result = compare_resume_to_job(job_text, resume_text)
         if not resume_text.strip():
             logger.error("Extracted resume text is empty")
             return render_template(
-        'resumemat.html',
-        result="Resume content could not be read. Please upload a readable DOCX/PDF/TXT file.",
-        score_value=0,
-        job_text=job_text,
-    )
+                'resumemat.html',
+                result="Resume content could not be read. Please upload a readable DOCX/PDF/TXT file.",
+                score_value=0,
+                job_text=job_text,
+            )
 
+        result = compare_resume_to_job(job_text, resume_text)
 
         # Optionally, save result to a file
         with open("resumemat.txt", "w", encoding="utf-8") as f:
             f.write(result)
+
         numbers = re.findall(r"\b(\d{1,3})\b", result)
         for num in numbers:
             val = int(num)
             if 0 <= val <= 100:
                 score_value = val
                 break
-            else:
-                score_value = 0
-        cleaned_result = result.replace('*', '')
-        #save_cached_result(hash_key, {"result": cleaned_result, "score": score_value,})
 
-    return render_template('resumemat.html', result=cleaned_result, score_value = score_value, job_text=job_text)
+        cleaned_result = result.replace('*', '')
+
+    return render_template('resumemat.html', result=cleaned_result, score_value=score_value, job_text=job_text)
 
 
 # Initialize Flask app
