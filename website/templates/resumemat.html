@@ -67,10 +67,10 @@
     }
     
     .result-box {
-        min-height: 200px;
-        max-height: 500px;
+        min-height: 120px;
+        max-height: 220px;
         overflow-y: auto;
-        padding: 20px;
+        padding: 15px;
         border-radius: 8px;
         background-color: #f8f9fa;
         border: 1px solid #e9ecef;
@@ -569,90 +569,83 @@
 
        
     });
-    // Remove junk entries that were saved when no real result existed
-    // (score 0 + empty jobText = corrupted entry from the old broken guard)
-    (function cleanJunkSaves() {
+    // Safely remove junk entries — wrapped so an error here can't block restore
+    try {
         let h = JSON.parse(localStorage.getItem("analysisNotes")) || [];
         const before = h.length;
         h = h.filter(item => item.score > 0 || (item.jobText && item.jobText.trim().length > 0));
         if (h.length !== before) localStorage.setItem("analysisNotes", JSON.stringify(h));
-    })();
+    } catch(e) { /* ignore */ }
 
-    loadHistory();
+    // Load saved-results list — wrapped so an error here can't block restore
+    try { loadHistory(); } catch(e) { /* ignore */ }
 
     // AUTO SAVE — only when the server actually returned a result.
-    (function () {
+    try {
         const _d = document.getElementById('resume-chat-data');
-        if (!_d) return;
-        try {
+        if (_d) {
             const _ctx = JSON.parse(_d.textContent);
-            if (_ctx.analysis && _ctx.analysis.trim().length > 10) {
-                autoSaveResult();
-            }
-        } catch (e) { /* ignore parse errors */ }
-    })();
+            if (_ctx.analysis && _ctx.analysis.trim().length > 10) autoSaveResult();
+        }
+    } catch(e) { /* ignore */ }
 
-    // AUTO RESTORE — if the server sent no results (e.g. after a page refresh),
-    // silently reload the most recent saved analysis so nothing is lost.
-    (function () {
+    // AUTO RESTORE — runs last, independently of everything above.
+    // If the server sent no results (refresh / direct navigation) restore the
+    // most recent saved analysis from localStorage.
+    try {
         const _d = document.getElementById('resume-chat-data');
-        if (!_d) return;
-        try {
-            const _ctx = JSON.parse(_d.textContent);
-            // Skip if the server already provided fresh results
-            if (_ctx.analysis && _ctx.analysis.trim().length > 10) return;
+        const _ctx = _d ? JSON.parse(_d.textContent) : {};
+        const _hasServer = !!(_ctx.analysis && _ctx.analysis.trim().length > 10);
 
-            const saved = JSON.parse(localStorage.getItem("analysisNotes")) || [];
-            if (saved.length === 0) return;
-            const latest = saved[0];
-            if (!latest.analysis || latest.analysis.trim().length < 20) return;
+        if (!_hasServer) {
+            const _saved = JSON.parse(localStorage.getItem("analysisNotes") || "[]");
+            const _item  = _saved[0];
 
-            // Restore the analysis text
-            const analysisBox = document.querySelector(".analysis-content");
-            if (analysisBox) {
-                analysisBox.innerHTML = latest.analysis;
-                const emptyState = analysisBox.querySelector('#analysis-empty-state');
-                if (emptyState) emptyState.remove();
+            if (_item && _item.analysis && _item.analysis.trim().length > 20) {
+
+                // Restore analysis HTML
+                const _box = document.querySelector(".analysis-content");
+                if (_box) {
+                    _box.innerHTML = _item.analysis;
+                    const _es = _box.querySelector('#analysis-empty-state');
+                    if (_es) _es.remove();
+                }
+
+                // Restore job description textarea
+                const _ta = document.querySelector('textarea[name="job_req"]');
+                if (_ta && _item.jobText) _ta.value = _item.jobText;
+
+                // Restore score text (override the "0%" from the template)
+                const _pct = document.querySelector(".percentage");
+                if (_pct) _pct.textContent = (_item.score || 0) + "%";
+
+                // Restore score circle colour + arc
+                const _circ = document.querySelector(".circle");
+                if (_circ) {
+                    const _R = 15.9155, _C = 2 * Math.PI * _R;
+                    const _col = _item.score >= 81 ? "#28a745"
+                               : _item.score >= 61 ? "#4a90e2"
+                               : _item.score >= 31 ? "#ffc107"
+                               : "#dc3545";
+                    _circ.style.stroke = _col;
+                    _circ.setAttribute("stroke", _col);
+                    _circ.setAttribute("stroke-dasharray", _C);
+                    setTimeout(() => {
+                        _circ.setAttribute("stroke-dashoffset", _C * (1 - _item.score / 100));
+                    }, 250);
+                }
+
+                // Update chat context (best-effort — won't break restore if it fails)
+                try {
+                    if (typeof window.updateChatContext === 'function') {
+                        const _tmp = document.createElement('div');
+                        _tmp.innerHTML = _item.analysis;
+                        window.updateChatContext(_item.jobText || '', (_tmp.textContent || '').trim());
+                    }
+                } catch(_e) { /* ignore chat context errors */ }
             }
-
-            // Restore the job description textarea
-            const jobTextarea = document.querySelector('textarea[name="job_req"]');
-            if (jobTextarea && latest.jobText) jobTextarea.value = latest.jobText;
-
-            // Restore the score text and circle
-            const percentBox = document.querySelector(".percentage");
-            if (percentBox) percentBox.textContent = latest.score + "%";
-
-            const circleEl = document.querySelector(".circle");
-            if (circleEl) {
-                const r = 15.9155;
-                const circ = 2 * Math.PI * r;
-                circleEl.setAttribute("stroke-dasharray", circ);
-
-                let col;
-                if (latest.score < 30)      col = "#dc3545";
-                else if (latest.score < 61) col = "#ffc107";
-                else if (latest.score < 81) col = "#4a90e2";
-                else                        col = "#28a745";
-                circleEl.style.stroke = col;
-                circleEl.setAttribute("stroke", col);
-
-                // Animate the arc after a short delay so the CSS transition plays
-                setTimeout(() => {
-                    circleEl.setAttribute("stroke-dashoffset", circ * (1 - latest.score / 100));
-                }, 200);
-            }
-
-            // Load the restored analysis into the chat context
-            if (typeof window.updateChatContext === 'function') {
-                const tmp = document.createElement('div');
-                tmp.innerHTML = latest.analysis;
-                const plain = (tmp.textContent || tmp.innerText || '').trim();
-                window.updateChatContext(latest.jobText || '', plain);
-            }
-
-        } catch (e) { /* ignore */ }
-    })();
+        }
+    } catch(e) { /* ignore entire restore block */ }
 
     });
 
