@@ -24,26 +24,26 @@ from flask import send_from_directory
 import uuid
 from dotenv import load_dotenv
 
-# ── Load env & config ──────────────────────────────────────────────────────────
+#  Load env & config
 load_dotenv()
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = Config.GOOGLE_APPLICATION_CREDENTIALS
 
-# ── App setup ──────────────────────────────────────────────────────────────────
+# App setup 
 app = create_app()
 app.config.from_object(Config)
 CORS(app)
 
-# ── Logging (must come before any function that uses logger) ───────────────────
+# Logging (must come before any function that uses logger) 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# ── OpenAI ─────────────────────────────────────────────────────────────────────
+# OpenAI
 openai.api_key = Config.OPENAI_API_KEY
 
 
-# ══════════════════════════════════════════════════════════════════════════════
+
 # Helper functions
-# ══════════════════════════════════════════════════════════════════════════════
+
 
 def extract_pdf_text(file_stream):
     reader = PdfReader(file_stream)
@@ -243,7 +243,7 @@ def resumemat():
     return render_template("resumemat.html")
 
 
-@app.route("/upload", methods=["POST"])
+@app.route("/uploads", methods=["POST"])
 def upload_resume():
     """Handle resume uploads for the summariser page."""
     logger.info("Upload endpoint hit")
