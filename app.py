@@ -174,7 +174,6 @@ def generate_basic_analysis(text):
 # ==============================================================================
 
 @app.route('/', methods=['GET', 'POST'])
-@login_required
 def index():
     """Resume job-match page."""
     result = None
@@ -183,6 +182,8 @@ def index():
     job_text = ''
 
     if request.method == 'POST':
+        if not current_user.is_authenticated:
+            return redirect(url_for('auth.login'))
         job_text = request.form.get('job_req', '')
         resume_file = request.files.get('resume')
 
@@ -219,12 +220,10 @@ def index():
     return render_template('resumemat.html', result=None, score_value=0, job_text='')
 
 @app.route("/resume-summarizer")
-@login_required
 def resumesum():
     return render_template("resumesum.html")
 
 @app.route("/resume-jobmatch")
-@login_required
 def resumemat():
     return render_template("resumemat.html")
 
