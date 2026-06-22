@@ -1,5 +1,5 @@
 from website import create_app
-from flask import Flask, render_template, request, jsonify, current_app, Response
+from flask import Flask, render_template, request, jsonify, current_app, Response, redirect, url_for
 import openai
 from PyPDF2 import PdfReader
 from docx import Document
@@ -17,33 +17,31 @@ from openai._exceptions import RateLimitError, AuthenticationError, APIConnectio
 from config import Config
 from flask_cors import CORS
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
-import fitz  # PyMuPDF
+import fitz # PyMuPDF
 from PIL import Image
 import pytesseract
 from flask import send_from_directory
 import uuid
 from dotenv import load_dotenv
+from flask_login import login_required, current_user
 
-#  Load env & config
+# Load env & config
 load_dotenv()
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = Config.GOOGLE_APPLICATION_CREDENTIALS
 
-# App setup 
+# App setup
 app = create_app()
 app.config.from_object(Config)
 CORS(app)
 
-# Logging (must come before any function that uses logger) 
+# Logging (must come before any function that uses logger)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # OpenAI
 openai.api_key = Config.OPENAI_API_KEY
 
-
-
 # Helper functions
-
 
 def extract_pdf_text(file_stream):
     reader = PdfReader(file_stream)
@@ -51,7 +49,6 @@ def extract_pdf_text(file_stream):
     for page in reader.pages:
         text += page.extract_text() or ""
     return text
-
 
 def extract_docx_text(file_stream):
     try:
@@ -63,7 +60,6 @@ def extract_docx_text(file_stream):
         logger.error(f"Error reading DOCX: {e}", exc_info=True)
         return f"Error reading DOCX: {str(e)}"
 
-
 def extract_text_from_file(filename: str, resume_bytes: bytes):
     file_stream = io.BytesIO(resume_bytes)
     if filename.endswith('.pdf'):
@@ -73,7 +69,6 @@ def extract_text_from_file(filename: str, resume_bytes: bytes):
     elif filename.endswith('.txt'):
         return file_stream.getvalue().decode('utf-8')
     return ""
-
 
 def compare_resume_to_job(job_description, resume):
     prompt = f"""
@@ -115,14 +110,13 @@ Rules:
 - Use + at the start of every line that is a STRENGTH or MATCH
 - Use - at the start of every line that is a GAP or MISSING requirement
 - Remove all asterisks
-- Be specific — mention exact skills, tools, and requirements from the job description
+- Be specific -- mention exact skills, tools, and requirements from the job description
 """
     response = openai.chat.completions.create(
         model="gpt-4o",
         messages=[{"role": "user", "content": prompt}]
     )
     return response.choices[0].message.content
-
 
 @retry(
     stop=stop_after_attempt(3),
@@ -159,7 +153,6 @@ def generate_summary(text):
         logger.error(f"OpenAI API error: {str(e)}")
         raise
 
-
 def generate_basic_analysis(text):
     """Fallback analysis when AI is unavailable."""
     try:
@@ -176,21 +169,21 @@ def generate_basic_analysis(text):
         logger.error(f"Basic analysis failed: {str(e)}")
         return {"error": "Could not generate basic analysis"}
 
-
-# ══════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 # Routes
-# ══════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 
 @app.route('/', methods=['GET', 'POST'])
+@login_required
 def index():
-    """Resume job-match page — handles both the form display and form submission."""
-    result        = None
-    score_value   = 0
-    cleaned_result = None   # always defined — avoids NameError on GET
-    job_text      = ''      # always defined
+    """Resume job-match page."""
+    result = None
+    score_value = 0
+    cleaned_result = None
+    job_text = ''
 
     if request.method == 'POST':
-        job_text    = request.form.get('job_req', '')
+        job_text = request.form.get('job_req', '')
         resume_file = request.files.get('resume')
 
         if not job_text.strip() or not resume_file:
@@ -198,7 +191,6 @@ def index():
 
         resume_bytes = resume_file.read()
         resume_file.stream.seek(0)
-
         resume_text = extract_text_from_file(resume_file.filename, resume_bytes)
 
         if not resume_text.strip():
@@ -212,11 +204,9 @@ def index():
 
         result = compare_resume_to_job(job_text, resume_text)
 
-        # Persist raw result to disk (optional)
         with open("resumemat.txt", "w", encoding="utf-8") as f:
             f.write(result)
 
-        # Extract numeric score (first number in 0-100 range)
         for num in re.findall(r"\b(\d{1,3})\b", result):
             val = int(num)
             if 0 <= val <= 100:
@@ -224,26 +214,22 @@ def index():
                 break
 
         cleaned_result = result.replace('*', '')
+        return render_template('resumemat.html', result=cleaned_result, score_value=score_value, job_text=job_text)
 
-    return render_template(
-        'resumemat.html',
-        result=cleaned_result,
-        score_value=score_value,
-        job_text=job_text,
-    )
-
+    return render_template('resumemat.html', result=None, score_value=0, job_text='')
 
 @app.route("/resume-summarizer")
+@login_required
 def resumesum():
     return render_template("resumesum.html")
 
-
 @app.route("/resume-jobmatch")
+@login_required
 def resumemat():
     return render_template("resumemat.html")
 
-
 @app.route("/uploads", methods=["POST"])
+@login_required
 def upload_resume():
     """Handle resume uploads for the summariser page."""
     logger.info("Upload endpoint hit")
@@ -256,7 +242,7 @@ def upload_resume():
         return jsonify({"error": "Empty filename"}), 400
 
     filename = secure_filename(file.filename)
-    ext      = filename.lower()
+    ext = filename.lower()
     filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
 
     try:
@@ -307,18 +293,18 @@ def upload_resume():
             except Exception as e:
                 logger.error(f"Failed to delete temp file: {str(e)}")
 
-
 @app.route("/resume-chat", methods=["POST"])
+@login_required
 def resume_chat():
-    """Chat endpoint — resume coaching powered by GPT-4o."""
+    """Chat endpoint -- resume coaching powered by GPT-4o."""
     data = request.get_json()
     if not data:
         return jsonify({"error": "No data provided"}), 400
 
-    user_message    = data.get("message", "").strip()
+    user_message = data.get("message", "").strip()
     job_description = data.get("job_description", "").strip()
     resume_analysis = data.get("resume_analysis", "").strip()
-    history         = data.get("history", [])
+    history = data.get("history", [])
 
     if not user_message:
         return jsonify({"error": "No message provided"}), 400
@@ -331,7 +317,7 @@ def resume_chat():
 
     system_prompt = (
         "You are an expert career coach and resume advisor. "
-        "Help the user improve their resume in any way they ask — "
+        "Help the user improve their resume in any way they ask -- "
         "fixing sections, adding skills, rewriting bullet points, "
         "improving formatting, addressing gaps, or general best practices."
         + (f"\n\nYou have the following context:\n{context_block}" if context_block else "")
@@ -361,11 +347,11 @@ def resume_chat():
         logger.error(f"Resume chat API error: {str(e)}")
         return jsonify({"error": "Failed to get a response. Please try again."}), 500
 
-
 @app.route("/speak", methods=["POST"])
+@login_required
 def speak_summary():
     from google.cloud import texttospeech
-    data         = request.get_json()
+    data = request.get_json()
     summary_text = data.get("text", "").strip()
 
     if not summary_text:
@@ -377,10 +363,10 @@ def speak_summary():
         filename = f"{uuid.uuid4()}.mp3"
         filepath = os.path.join(audio_folder, filename)
 
-        tts_client  = texttospeech.TextToSpeechClient()
-        input_text  = texttospeech.SynthesisInput(text=summary_text)
-        voice_name  = data.get("voice", "en-US-Wavenet-D")
-        voice       = texttospeech.VoiceSelectionParams(
+        tts_client = texttospeech.TextToSpeechClient()
+        input_text = texttospeech.SynthesisInput(text=summary_text)
+        voice_name = data.get("voice", "en-US-Wavenet-D")
+        voice = texttospeech.VoiceSelectionParams(
             language_code="en-US",
             name=voice_name,
             ssml_gender=texttospeech.SsmlVoiceGender.MALE,
@@ -400,29 +386,27 @@ def speak_summary():
         logger.error(f"Google TTS error: {str(e)}", exc_info=True)
         return jsonify({"error": "Audio generation failed"}), 500
 
-
 @app.route("/audio/<filename>")
 def serve_audio(filename):
     audio_folder = os.path.join(current_app.root_path, "website", "audio")
     return send_from_directory(audio_folder, filename)
 
-
 @app.route("/export/summary-pdf", methods=["POST"])
+@login_required
 def export_summary_pdf():
-    data    = request.get_json()
+    data = request.get_json()
     summary = (data or {}).get("summary", "").strip()
     if not summary:
         return "No summary provided", 400
 
-    # Strip voice-name lines
     voice_names = ["Alex", "Rose", "Linda", "Tom"]
-    lines   = [l for l in summary.split("\n") if l.strip() not in voice_names]
+    lines = [l for l in summary.split("\n") if l.strip() not in voice_names]
     summary = "\n".join(lines).strip()
 
     buffer = io.BytesIO()
-    doc    = SimpleDocTemplate(buffer, pagesize=LETTER)
+    doc = SimpleDocTemplate(buffer, pagesize=LETTER)
     styles = getSampleStyleSheet()
-    story  = [
+    story = [
         Paragraph("<b>Resume Summary</b>", styles["Title"]),
         Spacer(1, 12),
     ]
@@ -440,7 +424,6 @@ def export_summary_pdf():
         headers={"Content-Disposition": "attachment; filename=resume_summary.pdf"},
     )
 
-
 @app.route("/health")
 def health_check():
     return jsonify({
@@ -449,11 +432,10 @@ def health_check():
             "openai": "enabled" if Config.OPENAI_API_KEY else "disabled",
             "storage": {
                 "upload_folder": os.path.exists(app.config["UPLOAD_FOLDER"]),
-                "audio_folder":  os.path.exists(app.config["AUDIO_FOLDER"]),
+                "audio_folder": os.path.exists(app.config["AUDIO_FOLDER"]),
             },
         },
     })
-
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 8080))
