@@ -4,160 +4,191 @@
 
 {% block head %}
 <style>
-    .hero-section {
-        background: linear-gradient(135deg, rgba(26, 58, 107, 0.04) 0%, rgba(59, 130, 246, 0.06) 100%);
-        border-radius: 24px;
-        padding: 60px 40px;
-        margin-bottom: 48px;
-        border: 1px solid rgba(59, 130, 246, 0.1);
-        position: relative;
-        overflow: hidden;
-    }
-    .hero-section::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        right: -10%;
-        width: 400px;
-        height: 400px;
-        background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%);
-        pointer-events: none;
-    }
-    .hero-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        background: rgba(59, 130, 246, 0.1);
-        color: var(--primary);
-        border: 1px solid rgba(59, 130, 246, 0.2);
-        border-radius: 50px;
-        padding: 5px 16px;
-        font-size: 0.8rem;
-        font-weight: 600;
-        letter-spacing: 0.5px;
-        text-transform: uppercase;
-        margin-bottom: 20px;
-    }
-    .hero-title {
-        font-size: clamp(1.8rem, 4vw, 2.8rem);
-        font-weight: 800;
-        line-height: 1.2;
-        color: var(--primary);
-        margin-bottom: 16px;
-        letter-spacing: -0.5px;
-    }
-    .hero-title span {
-        background: var(--gradient-1);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-    .hero-subtitle {
-        font-size: 1.05rem;
-        color: #64748b;
-        max-width: 560px;
-        margin: 0 auto 32px;
-        line-height: 1.7;
-    }
-    .feature-card {
-        background: white;
-        border-radius: 20px;
-        padding: 32px;
-        box-shadow: 0 4px 20px rgba(26, 58, 107, 0.08);
-        border: 1px solid rgba(59, 130, 246, 0.08);
-        transition: all 0.3s ease;
-        height: 100%;
-        position: relative;
-        overflow: hidden;
-    }
-    .feature-card::before {
-        content: '';
-        position: absolute;
-        top: 0; left: 0; right: 0;
-        height: 3px;
-        background: var(--gradient-1);
-        opacity: 0;
-        transition: opacity 0.3s ease;
-    }
-    .feature-card:hover { transform: translateY(-6px); box-shadow: 0 16px 40px rgba(26, 58, 107, 0.15); }
-    .feature-card:hover::before { opacity: 1; }
-    .feature-card .feature-icon { margin-bottom: 20px; }
-    .feature-list { list-style: none; padding: 0; margin: 0 0 24px; }
-    .feature-list li { padding: 6px 0; color: #64748b; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; }
-    .feature-list li::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--gradient-1); flex-shrink: 0; }
-    .how-it-works { background: white; border-radius: 20px; padding: 40px; box-shadow: 0 4px 20px rgba(26, 58, 107, 0.08); border: 1px solid rgba(59, 130, 246, 0.08); }
-    .step-number { width: 56px; height: 56px; background: var(--gradient-1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: 700; color: white; margin: 0 auto 16px; box-shadow: 0 4px 15px rgba(26, 58, 107, 0.3); }
+.hero-section {
+background: linear-gradient(135deg, rgba(26, 58, 107, 0.04) 0%, rgba(59, 130, 246, 0.06) 100%);
+border-radius: 24px;
+padding: 60px 40px;
+margin-bottom: 48px;
+border: 1px solid rgba(59, 130, 246, 0.1);
+position: relative;
+overflow: hidden;
+}
+.hero-section::before {
+content: '';
+position: absolute;
+top: -50%;
+right: -10%;
+width: 400px;
+height: 400px;
+background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%);
+pointer-events: none;
+}
+.hero-badge {
+display: inline-flex;
+align-items: center;
+gap: 6px;
+background: rgba(59, 130, 246, 0.1);
+color: var(--primary);
+border: 1px solid rgba(59, 130, 246, 0.2);
+border-radius: 50px;
+padding: 5px 16px;
+font-size: 0.8rem;
+font-weight: 600;
+letter-spacing: 0.5px;
+text-transform: uppercase;
+margin-bottom: 20px;
+}
+.hero-title {
+font-size: clamp(1.8rem, 4vw, 2.8rem);
+font-weight: 800;
+line-height: 1.2;
+color: var(--primary);
+margin-bottom: 16px;
+letter-spacing: -0.5px;
+}
+.hero-title span {
+background: var(--gradient-1);
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+background-clip: text;
+}
+.hero-subtitle {
+font-size: 1.05rem;
+color: #64748b;
+max-width: 560px;
+margin: 0 auto 32px;
+line-height: 1.7;
+}
+.feature-card {
+background: white;
+border-radius: 20px;
+padding: 32px;
+box-shadow: 0 4px 20px rgba(26, 58, 107, 0.08);
+border: 1px solid rgba(59, 130, 246, 0.08);
+transition: all 0.3s ease;
+height: 100%;
+position: relative;
+overflow: hidden;
+}
+.feature-card::before {
+content: '';
+position: absolute;
+top: 0; left: 0; right: 0;
+height: 3px;
+background: var(--gradient-1);
+opacity: 0;
+transition: opacity 0.3s ease;
+}
+.feature-card:hover { transform: translateY(-6px); box-shadow: 0 16px 40px rgba(26, 58, 107, 0.15); }
+.feature-card:hover::before { opacity: 1; }
+.feature-card .feature-icon { margin-bottom: 20px; }
+.feature-list { list-style: none; padding: 0; margin: 0 0 24px; }
+.feature-list li { padding: 6px 0; color: #64748b; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; }
+.feature-list li::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--gradient-1); flex-shrink: 0; }
+.how-it-works { background: white; border-radius: 20px; padding: 40px; box-shadow: 0 4px 20px rgba(26, 58, 107, 0.08); border: 1px solid rgba(59, 130, 246, 0.08); }
+.step-number { width: 56px; height: 56px; background: var(--gradient-1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: 700; color: white; margin: 0 auto 16px; box-shadow: 0 4px 15px rgba(26, 58, 107, 0.3); }
+.sign-in-badge {
+display: inline-flex; align-items: center; gap: 6px;
+background: rgba(251, 191, 36, 0.1); color: #92400e;
+border: 1px solid rgba(251, 191, 36, 0.3);
+border-radius: 50px; padding: 4px 12px;
+font-size: 0.78rem; font-weight: 600; margin-bottom: 12px;
+}
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="container pt-2 pb-5">
 
-    <div class="hero-section text-center">
-        <div class="hero-badge"><i class="fas fa-robot"></i> Powered by Avants AI</div>
-        <h1 class="hero-title">Smart Resume Analysis<br><span>Powered by AI</span></h1>
-        <p class="hero-subtitle">Get instant AI-driven insights on your resume. Match it with job descriptions, identify gaps, and land your dream job faster.</p>
-        <div class="d-flex flex-wrap justify-content-center gap-3">
-            <a href="/resume-summarizer" class="btn btn-primary btn-lg btn-rounded"><i class="fas fa-file-alt me-2"></i>Analyze My Resume</a>
-            <a href="/resume-jobmatch" class="btn btn-outline-primary btn-lg btn-rounded"><i class="fas fa-search me-2"></i>Match a Job</a>
-        </div>
-    </div>
+<div class="hero-section text-center">
+<div class="hero-badge"><i class="fas fa-robot"></i> Powered by Avants AI</div>
+<h1 class="hero-title">Smart Resume Analysis<br><span>Powered by AI</span></h1>
+<p class="hero-subtitle">Get instant AI-driven insights on your resume. Match it with job descriptions, identify gaps, and land your dream job faster.</p>
 
-    <div class="text-center mb-5">
-        <h2 class="section-title d-inline-block">Our Powerful Features</h2>
-    </div>
+{% if current_user.is_authenticated %}
+<div class="d-flex flex-wrap justify-content-center gap-3">
+<a href="/resume-summarizer" class="btn btn-primary btn-lg btn-rounded"><i class="fas fa-file-alt me-2"></i>Analyze My Resume</a>
+<a href="/resume-jobmatch" class="btn btn-outline-primary btn-lg btn-rounded"><i class="fas fa-search me-2"></i>Match a Job</a>
+</div>
+{% else %}
+<p class="text-muted mb-3" style="font-size:0.92rem;"><i class="fas fa-lock me-1"></i> Sign in to start using the tools</p>
+<div class="d-flex flex-wrap justify-content-center gap-3">
+<a href="/login" class="btn btn-primary btn-lg btn-rounded"><i class="fas fa-sign-in-alt me-2"></i>Sign In to Get Started</a>
+<a href="/sign-up" class="btn btn-outline-primary btn-lg btn-rounded"><i class="fas fa-user-plus me-2"></i>Create Free Account</a>
+</div>
+{% endif %}
+</div>
 
-    <div class="row g-4 mb-5">
-        <div class="col-md-6">
-            <div class="feature-card">
-                <div class="feature-icon"><i class="fas fa-file-alt"></i></div>
-                <h3 style="font-weight:700; color: var(--primary);">Resume Summarizer</h3>
-                <p class="text-muted mb-3" style="font-size: 0.93rem;">Upload your resume and get an instant AI-powered summary of your key qualifications, skills, and experience.</p>
-                <ul class="feature-list">
-                    <li>Work Experience Analysis</li>
-                    <li>Skills &amp; Certifications Extraction</li>
-                    <li>Education Summary</li>
-                    <li>Leadership Highlights</li>
-                </ul>
-                <a href="/resume-summarizer" class="btn btn-primary btn-rounded">Get Started <i class="fas fa-arrow-right ms-1"></i></a>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="feature-card">
-                <div class="feature-icon"><i class="fas fa-search"></i></div>
-                <h3 style="font-weight:700; color: var(--primary);">Resume Matching</h3>
-                <p class="text-muted mb-3" style="font-size: 0.93rem;">Match your resume against job descriptions to get a detailed analysis of how well you fit the position.</p>
-                <ul class="feature-list">
-                    <li>1&ndash;100 Match Score</li>
-                    <li>Qualification Alignment</li>
-                    <li>Improvement Suggestions</li>
-                    <li>Criteria Analysis</li>
-                </ul>
-                <a href="/resume-jobmatch" class="btn btn-primary btn-rounded">Get Started <i class="fas fa-arrow-right ms-1"></i></a>
-            </div>
-        </div>
-    </div>
+<div class="text-center mb-5">
+<h2 class="section-title d-inline-block">Our Powerful Features</h2>
+</div>
 
-    <div class="how-it-works">
-        <h3 class="text-center fw-bold mb-4" style="color: var(--primary);">How It Works</h3>
-        <div class="row g-4 text-center">
-            <div class="col-md-4">
-                <div class="step-number">1</div>
-                <h5 style="font-weight: 600;">Upload Your Resume</h5>
-                <p class="text-muted" style="font-size: 0.9rem;">Upload your resume in PDF, DOCX, or TXT format</p>
-            </div>
-            <div class="col-md-4">
-                <div class="step-number">2</div>
-                <h5 style="font-weight: 600;">AI Analysis</h5>
-                <p class="text-muted" style="font-size: 0.9rem;">Our AI analyzes your resume content in seconds</p>
-            </div>
-            <div class="col-md-4">
-                <div class="step-number">3</div>
-                <h5 style="font-weight: 600;">Get Results</h5>
-                <p class="text-muted" style="font-size: 0.9rem;">Receive detailed insights and actionable recommendations</p>
-            </div>
-        </div>
-    </div>
+<div class="row g-4 mb-5">
+<div class="col-md-6">
+<div class="feature-card">
+<div class="feature-icon"><i class="fas fa-file-alt"></i></div>
+<h3 style="font-weight:700; color: var(--primary);">Resume Summarizer</h3>
+<p class="text-muted mb-3" style="font-size: 0.93rem;">Upload your resume and get an instant AI-powered summary of your key qualifications, skills, and experience.</p>
+<ul class="feature-list">
+<li>Work Experience Analysis</li>
+<li>Skills &amp; Certifications Extraction</li>
+<li>Education Summary</li>
+<li>Leadership Highlights</li>
+</ul>
+{% if current_user.is_authenticated %}
+<a href="/resume-summarizer" class="btn btn-primary btn-rounded">Get Started <i class="fas fa-arrow-right ms-1"></i></a>
+{% else %}
+<div class="sign-in-badge"><i class="fas fa-lock"></i> Sign in required</div><br>
+<a href="/login" class="btn btn-primary btn-rounded">Sign In to Use <i class="fas fa-arrow-right ms-1"></i></a>
+{% endif %}
+</div>
+</div>
+<div class="col-md-6">
+<div class="feature-card">
+<div class="feature-icon"><i class="fas fa-search"></i></div>
+<h3 style="font-weight:700; color: var(--primary);">Resume Matching</h3>
+<p class="text-muted mb-3" style="font-size: 0.93rem;">Match your resume against job descriptions to get a detailed analysis of how well you fit the position.</p>
+<ul class="feature-list">
+<li>1&ndash;100 Match Score</li>
+<li>Qualification Alignment</li>
+<li>Improvement Suggestions</li>
+<li>Criteria Analysis</li>
+</ul>
+{% if current_user.is_authenticated %}
+<a href="/resume-jobmatch" class="btn btn-primary btn-rounded">Get Started <i class="fas fa-arrow-right ms-1"></i></a>
+{% else %}
+<div class="sign-in-badge"><i class="fas fa-lock"></i> Sign in required</div><br>
+<a href="/login" class="btn btn-primary btn-rounded">Sign In to Use <i class="fas fa-arrow-right ms-1"></i></a>
+{% endif %}
+</div>
+</div>
+</div>
+
+<div class="how-it-works">
+<h3 class="text-center fw-bold mb-4" style="color: var(--primary);">How It Works</h3>
+<div class="row g-4 text-center">
+<div class="col-md-4">
+<div class="step-number">1</div>
+<h5 style="font-weight: 600;">Create an Account</h5>
+<p class="text-muted" style="font-size: 0.9rem;">Sign up for free -- takes less than a minute</p>
+</div>
+<div class="col-md-4">
+<div class="step-number">2</div>
+<h5 style="font-weight: 600;">Upload Your Resume</h5>
+<p class="text-muted" style="font-size: 0.9rem;">Upload in PDF, DOCX, or TXT format and let AI analyze it</p>
+</div>
+<div class="col-md-4">
+<div class="step-number">3</div>
+<h5 style="font-weight: 600;">Get Results</h5>
+<p class="text-muted" style="font-size: 0.9rem;">Receive detailed insights and actionable recommendations</p>
+</div>
+</div>
+{% if not current_user.is_authenticated %}
+<div class="text-center mt-4">
+<a href="/sign-up" class="btn btn-primary btn-rounded btn-lg"><i class="fas fa-rocket me-2"></i>Get Started Free</a>
+</div>
+{% endif %}
+</div>
 
 </div>
 {% endblock %}
