@@ -87,13 +87,6 @@ transition: opacity 0.3s ease;
 .feature-list li::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--gradient-1); flex-shrink: 0; }
 .how-it-works { background: white; border-radius: 20px; padding: 40px; box-shadow: 0 4px 20px rgba(26, 58, 107, 0.08); border: 1px solid rgba(59, 130, 246, 0.08); }
 .step-number { width: 56px; height: 56px; background: var(--gradient-1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: 700; color: white; margin: 0 auto 16px; box-shadow: 0 4px 15px rgba(26, 58, 107, 0.3); }
-.sign-in-badge {
-display: inline-flex; align-items: center; gap: 6px;
-background: rgba(251, 191, 36, 0.1); color: #92400e;
-border: 1px solid rgba(251, 191, 36, 0.3);
-border-radius: 50px; padding: 4px 12px;
-font-size: 0.78rem; font-weight: 600; margin-bottom: 12px;
-}
 </style>
 {% endblock %}
 
@@ -105,18 +98,10 @@ font-size: 0.78rem; font-weight: 600; margin-bottom: 12px;
 <h1 class="hero-title">Smart Resume Analysis<br><span>Powered by AI</span></h1>
 <p class="hero-subtitle">Get instant AI-driven insights on your resume. Match it with job descriptions, identify gaps, and land your dream job faster.</p>
 
-{% if current_user.is_authenticated %}
 <div class="d-flex flex-wrap justify-content-center gap-3">
 <a href="/resume-summarizer" class="btn btn-primary btn-lg btn-rounded"><i class="fas fa-file-alt me-2"></i>Analyze My Resume</a>
 <a href="/resume-jobmatch" class="btn btn-outline-primary btn-lg btn-rounded"><i class="fas fa-search me-2"></i>Match a Job</a>
 </div>
-{% else %}
-<p class="text-muted mb-3" style="font-size:0.92rem;"><i class="fas fa-lock me-1"></i> Sign in to start using the tools</p>
-<div class="d-flex flex-wrap justify-content-center gap-3">
-<a href="/login" class="btn btn-primary btn-lg btn-rounded"><i class="fas fa-sign-in-alt me-2"></i>Sign In to Get Started</a>
-<a href="/sign-up" class="btn btn-outline-primary btn-lg btn-rounded"><i class="fas fa-user-plus me-2"></i>Create Free Account</a>
-</div>
-{% endif %}
 </div>
 
 <div class="text-center mb-5">
@@ -135,12 +120,7 @@ font-size: 0.78rem; font-weight: 600; margin-bottom: 12px;
 <li>Education Summary</li>
 <li>Leadership Highlights</li>
 </ul>
-{% if current_user.is_authenticated %}
 <a href="/resume-summarizer" class="btn btn-primary btn-rounded">Get Started <i class="fas fa-arrow-right ms-1"></i></a>
-{% else %}
-<div class="sign-in-badge"><i class="fas fa-lock"></i> Sign in required</div><br>
-<a href="/login" class="btn btn-primary btn-rounded">Sign In to Use <i class="fas fa-arrow-right ms-1"></i></a>
-{% endif %}
 </div>
 </div>
 <div class="col-md-6">
@@ -154,12 +134,7 @@ font-size: 0.78rem; font-weight: 600; margin-bottom: 12px;
 <li>Improvement Suggestions</li>
 <li>Criteria Analysis</li>
 </ul>
-{% if current_user.is_authenticated %}
 <a href="/resume-jobmatch" class="btn btn-primary btn-rounded">Get Started <i class="fas fa-arrow-right ms-1"></i></a>
-{% else %}
-<div class="sign-in-badge"><i class="fas fa-lock"></i> Sign in required</div><br>
-<a href="/login" class="btn btn-primary btn-rounded">Sign In to Use <i class="fas fa-arrow-right ms-1"></i></a>
-{% endif %}
 </div>
 </div>
 </div>
@@ -183,11 +158,6 @@ font-size: 0.78rem; font-weight: 600; margin-bottom: 12px;
 <p class="text-muted" style="font-size: 0.9rem;">Receive detailed insights and actionable recommendations</p>
 </div>
 </div>
-{% if not current_user.is_authenticated %}
-<div class="text-center mt-4">
-<a href="/sign-up" class="btn btn-primary btn-rounded btn-lg"><i class="fas fa-rocket me-2"></i>Get Started Free</a>
-</div>
-{% endif %}
 </div>
 
 </div>
