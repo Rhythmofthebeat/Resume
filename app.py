@@ -26,7 +26,7 @@ from dotenv import load_dotenv
 from flask_login import login_required, current_user
 
 # Load env & config
-load_dotenv()
+load_dotenv(override=False)
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = Config.GOOGLE_APPLICATION_CREDENTIALS
 
 # App setup
