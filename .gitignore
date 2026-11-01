@@ -1,0 +1,7 @@
+.env
+secrets/
+instance/
+__pycache__/
+.DS_Store
+node_modules/
+cache_results/
